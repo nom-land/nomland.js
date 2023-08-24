@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Demo</title>
+    </head>
+    <body>
+        <script src="../dist/index.global.js"></script>
+        <div id="ls">
+            <input type="text" class="community" placeholder="57762" />
+            <button onclick="ls()">ls</button>
+            <div class="result"></div>
+        </div>
+        <div id="add">
+            <input type="text" class="community" placeholder="57747" />
+            <input type="text" class="listname" placeholder="be an honest person" />
+            <button onclick="add()">add</button>
+            <div class="result"></div>
+        </div>
+        <div id="balanceOf">
+            <input type="text" class="community" placeholder="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" />
+            <button onclick="balanceOf()">balanceOf</button>
+            <div class="result"></div>
+        </div>
+
+        <script>
+            function ls() {
+                function setResult(value) {
+                    document.querySelector("#ls>.result").innerHTML = value;
+                }
+                setResult("Loading...");
+                const c =
+                    document.querySelector("#ls>.community").value || 57762;
+                document.querySelector("#ls>.community").value = c;
+
+                const nomland = new window.Nomland();
+                nomland.ls(c).then((value) => {
+                    const { count, listNames } = value;
+                    setResult(
+                        `There are ${count} lists in the community` +
+                            (count > 0 ? `: ${listNames.join(", ")}` : `.`)
+                    );
+                });
+            }
+
+            function balanceOf() {
+                function setResult(value) {
+                    document.querySelector("#balanceOf>.result").innerHTML = value;
+                }
+                setResult("Loading...");
+                const c =
+                    document.querySelector("#balanceOf>.community").value || "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+                document.querySelector("#balanceOf>.community").value = c;
+
+                const nomland = new window.Nomland();
+                nomland.balanceOf(c).then((value) => {
+                    const { data } = value;
+                    setResult(
+                       data
+                    );
+                });
+            }
+        </script>
+    </body>
+</html>
