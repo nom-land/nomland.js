@@ -16,9 +16,9 @@ import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
 
 //Localhost
-(crossbell.id as any) = 31337;
-const localUrl = "http://127.0.0.1:8545" as string;
-cn.setJsonRpcAddress(localUrl);
+// (crossbell.id as any) = 31337;
+// const localUrl = "http://127.0.0.1:8545" as string;
+// cn.setJsonRpcAddress(localUrl);
 //Localhost End
 
 export default class Nomland {
