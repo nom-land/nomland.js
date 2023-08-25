@@ -45,3 +45,5 @@ export default class Nomland {
         return new Contract(undefined).csb.getBalance({ owner });
     }
 }
+
+export * from "./types";
