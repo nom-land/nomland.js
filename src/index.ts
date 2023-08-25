@@ -10,7 +10,7 @@ import {
     processCuration,
 } from "./curation";
 import { crossbell } from "crossbell/network";
-import * as cn from "crossbell/network";
+// import * as cn from "crossbell/network";
 import { Contract } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
