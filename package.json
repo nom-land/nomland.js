@@ -15,7 +15,8 @@
     "./*": "./*"
   },
   "scripts": {
-    "build": "tsup --dts"
+    "build": "tsup --dts",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "nomland"
