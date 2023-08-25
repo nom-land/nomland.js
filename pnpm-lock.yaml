@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@extractus/article-extractor':
-        specifier: ^8.0.2
-        version: 8.0.2
+        specifier: ^7.3.1
+        version: 7.3.1
       browser-bunyan:
         specifier: ^1.8.0
         version: 1.8.0
@@ -444,8 +444,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
-  /@extractus/article-extractor@8.0.2:
-    resolution: {integrity: sha512-z1Kde0H6U4y8v8VbQaxaE4RliMOrVIS/KUmoRmQ7cJn9N2OPFT5K5pucRml3DCWjyEFftLmVQzJDdo3HLLMCzQ==}
+  /@extractus/article-extractor@7.3.1:
+    resolution: {integrity: sha512-ExVYn6bRHPuT/CwDBXZk4BPAhMHYdolOCc9aaaUo+hcrHhI4Dogn4aTghfh+iV8hdbg81yBBgZEWVsA2urZ01g==}
     engines: {node: '>= 15'}
     dependencies:
       '@mozilla/readability': 0.4.4
