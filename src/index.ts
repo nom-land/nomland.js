@@ -14,12 +14,13 @@ import * as nw from "crossbell/network";
 import { Contract } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
-
+import { crossbell as csbChain } from "viem/chains";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
     const localUrl = "http://127.0.0.1:8545" as string;
     nw.setJsonRpcAddress(localUrl);
+    (csbChain.id as any) = 31337;
 }
 //Localhost End
 
