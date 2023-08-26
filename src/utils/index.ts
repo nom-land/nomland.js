@@ -35,16 +35,16 @@ export function feedbackUrl(
     }
 }
 
-const appPrefix = settings.appName.slice(0, 2);
+const appPrefix = (appName: string) => appName.slice(0, 2);
 
-export function makeListLinkType(list: string) {
-    return `${appPrefix}-ls-${list}`;
+export function makeListLinkType(appName: string, list: string) {
+    return `${appPrefix(appName)}-ls-${list}`;
 }
 
-export function getListLinkTypePrefix() {
-    return `${appPrefix}-ls-`;
+export function getListLinkTypePrefix(appName: string) {
+    return `${appPrefix(appName)}-ls-`;
 }
 
-export function getMembersLinkType() {
-    return `${appPrefix}-members`;
+export function getMembersLinkType(appName: string) {
+    return `${appPrefix(appName)}-members`;
 }

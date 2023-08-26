@@ -14,37 +14,44 @@ import * as nw from "crossbell/network";
 import { Contract } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
-import { crossbell as csbChain } from "viem/chains";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
     const localUrl = "http://127.0.0.1:8545" as string;
-    nw.setJsonRpcAddress(localUrl);
-    (csbChain.id as any) = 31337;
+    (nw.crossbell.rpcUrls as any) = {
+        default: [localUrl],
+        public: [localUrl],
+    };
 }
 //Localhost End
 
 export default class Nomland {
     #appKeyOrProvider: `0x${string}` | EIP1193Provider;
+    #appName: string;
 
-    constructor(appKeyOrProvider?: `0x${string}` | EIP1193Provider) {
+    constructor(
+        appName: string,
+        appKeyOrProvider?: `0x${string}` | EIP1193Provider
+    ) {
         const key =
             appKeyOrProvider ||
             `0x0000000000000000000000000000000000000000000000000000000000000000`;
         this.#appKeyOrProvider = key;
+        this.#appName = appName;
     }
     processCuration(c: Curation, url: string) {
-        return processCuration(c, url, this.#appKeyOrProvider);
+        return processCuration(c, url, this.#appKeyOrProvider, this.#appName);
     }
     processDiscussion() {}
     ls(c: Accountish) {
-        return getCommunityLists(c);
+        return getCommunityLists(this.#appName, c);
     }
     add(c: Accountish, l: string) {
-        return createCurationList(this.#appKeyOrProvider, c, l);
+        return createCurationList(this.#appName, this.#appKeyOrProvider, c, l);
     }
     balanceOf(owner: `0x${string}`) {
         console.log(crossbell.id);
+
         return new Contract(undefined).csb.getBalance({ owner });
     }
 }
