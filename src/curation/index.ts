@@ -2,7 +2,6 @@
 Based on Crossbell, process the curation.
 */
 
-import { settings } from "../config";
 import { parseRecord } from "../record/parser";
 import { Contract, NoteMetadata } from "crossbell";
 import {
@@ -20,6 +19,7 @@ import { log } from "../utils/log";
 import { type EIP1193Provider } from "eip1193-types";
 
 export async function curateRecordInCommunity(
+    appName: string,
     c: Contract,
     curator: number,
     communityId: number,
@@ -31,7 +31,7 @@ export async function curateRecordInCommunity(
     // 1. Curator 发一条 note，且这个note指向 Record
     // 2. Community Character 把这个 note 放到 community list 里（link）
 
-    let sources = [settings.appName];
+    let sources = [appName];
     if (rawData?.sources) sources = sources.concat(rawData.sources);
 
     const metadata = {
@@ -85,6 +85,7 @@ export async function curateRecordInCommunity(
 
 // Make a new linklist for the community
 export async function createCurationList(
+    appName: string,
     adminPrivateKey: `0x${string}` | EIP1193Provider,
     community: Accountish,
     list: string
@@ -106,18 +107,30 @@ export async function createCurationList(
 
     //community links itself and then unlinks
     console.log("linking...", list);
-    const tx = await addRecord(contract, communityId, communityId, list);
+    const tx = await addRecord(
+        appName,
+        contract,
+        communityId,
+        communityId,
+        list
+    );
     console.log(tx.transactionHash);
     console.log("unlinking...", list);
-    const tx2 = await removeRecord(contract, communityId, communityId, list);
+    const tx2 = await removeRecord(
+        appName,
+        contract,
+        communityId,
+        communityId,
+        list
+    );
     console.log(tx2.transactionHash);
 }
 
-export async function getCommunityLists(c: Accountish) {
+export async function getCommunityLists(appName: string, c: Accountish) {
     const links = await getLinks(c);
     const listNames = links.list
-        .filter((l) => l.linkType.startsWith(getListLinkTypePrefix()))
-        .map((l) => l.linkType.slice(getListLinkTypePrefix().length));
+        .filter((l) => l.linkType.startsWith(getListLinkTypePrefix(appName)))
+        .map((l) => l.linkType.slice(getListLinkTypePrefix(appName).length));
     const count = listNames.length;
     return { count, listNames };
 }
@@ -125,7 +138,8 @@ export async function getCommunityLists(c: Accountish) {
 export async function processCuration(
     curation: Curation,
     url: string,
-    adminPrivateKeyOrProvider: `0x${string}` | EIP1193Provider
+    adminPrivateKeyOrProvider: `0x${string}` | EIP1193Provider,
+    appName: string
 ) {
     const { curator, community, lists, reason, raw: rawData } = curation;
     const { contract, admin } = await setup(adminPrivateKeyOrProvider);
@@ -181,7 +195,7 @@ export async function processCuration(
     if (mode === "server") {
         // Node env: Only if the admin is a private key, we can link the community to the curator
         // TODO
-        await addMember(contract, communityId, curatorId);
+        await addMember(appName, contract, communityId, curatorId);
 
         log.info("[DEBUG] Community char has followed curator char");
     }
@@ -190,6 +204,7 @@ export async function processCuration(
 
     // curate
     const noteId = await curateRecordInCommunity(
+        appName,
         contract,
         Number(curatorId),
         Number(communityId),
@@ -200,7 +215,7 @@ export async function processCuration(
     );
     if (mode === "server") {
         for (const list of lists) {
-            await addRecord(contract, communityId, recordId, list);
+            await addRecord(appName, contract, communityId, recordId, list);
         }
     }
     log.info("[DEBUG] Curation has been finished");
@@ -219,7 +234,8 @@ export async function processDiscussion(
     msgMetadata: NoteMetadata,
     discussing: "note" | "record",
     noteIdOrRecordId: string,
-    adminPrivateKey: `0x${string}`
+    adminPrivateKey: `0x${string}`,
+    appName: string
 ) {
     const { contract, admin } = await setup(adminPrivateKey);
 
@@ -253,7 +269,7 @@ export async function processDiscussion(
         },
     };
 
-    let sources = [settings.appName];
+    let sources = [appName];
     if (msgMetadata.sources) sources = sources.concat(msgMetadata.sources);
 
     noteOptions.metadataOrUri.sources = sources;
