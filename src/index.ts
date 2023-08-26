@@ -10,15 +10,17 @@ import {
     processCuration,
 } from "./curation";
 import { crossbell } from "crossbell/network";
-// import * as cn from "crossbell/network";
+import * as nw from "crossbell/network";
 import { Contract } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
 
 //Localhost
-// (crossbell.id as any) = 31337;
-// const localUrl = "http://127.0.0.1:8545" as string;
-// cn.setJsonRpcAddress(localUrl);
+if (process.env.NODE_ENV === "local") {
+    (crossbell.id as any) = 31337;
+    const localUrl = "http://127.0.0.1:8545" as string;
+    nw.setJsonRpcAddress(localUrl);
+}
 //Localhost End
 
 export default class Nomland {
