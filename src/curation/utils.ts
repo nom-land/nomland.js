@@ -1,4 +1,4 @@
-import { Contract, Numberish } from "crossbell";
+import { AttributesMetadata, Contract, Numberish } from "crossbell";
 import { makeListLinkType, getMembersLinkType } from "../utils";
 
 export async function addMember(
@@ -55,4 +55,8 @@ export async function removeRecord(
         toCharacterId: recordId,
         linkType: notWrapLinkType ? list : makeListLinkType(appName, list),
     });
+}
+
+export function getAttr(attrs: AttributesMetadata["attributes"], key: string) {
+    return attrs?.find((a) => a.trait_type === key)?.value;
 }

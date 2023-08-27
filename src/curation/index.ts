@@ -10,13 +10,13 @@ import {
     NoteId,
     RawCuration,
 } from "../types/curation";
-import { getCharacter, getCharacterByAcc, getLinks, setup } from "../crossbell";
+import { getCharacter, getCharacterByAcc, setup } from "../crossbell";
 import { getRecord } from "../record";
 import { Account, Accountish } from "../types/account";
-import { getListLinkTypePrefix } from "../utils";
 import { addMember, addRecord, removeRecord } from "./utils";
 import { log } from "../utils/log";
 import { type EIP1193Provider } from "eip1193-types";
+import { getCommunityLists } from "./ls";
 
 export async function curateRecordInCommunity(
     appName: string,
@@ -92,8 +92,9 @@ export async function createCurationList(
 ) {
     const { contract, admin } = await setup(adminPrivateKey);
 
-    const res = await getCommunityLists(community);
-    if (res.listNames.includes(list)) {
+    const res = await getCommunityLists(appName, community);
+    const listNames = res.list.map((l) => l.listName);
+    if (listNames.includes(list)) {
         return;
     }
 
@@ -124,15 +125,6 @@ export async function createCurationList(
         list
     );
     console.log(tx2.transactionHash);
-}
-
-export async function getCommunityLists(appName: string, c: Accountish) {
-    const links = await getLinks(c);
-    const listNames = links.list
-        .filter((l) => l.linkType.startsWith(getListLinkTypePrefix(appName)))
-        .map((l) => l.linkType.slice(getListLinkTypePrefix(appName).length));
-    const count = listNames.length;
-    return { count, listNames };
 }
 
 export async function processCuration(
