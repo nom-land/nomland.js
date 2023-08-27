@@ -4,16 +4,13 @@
 // nomland.processCuration(curation, options: {parser: xxx})
 
 import { Accountish } from "./types/account";
-import {
-    createCurationList,
-    getCommunityLists,
-    processCuration,
-} from "./curation";
+import { createCurationList, processCuration } from "./curation";
 import { crossbell } from "crossbell/network";
 import * as nw from "crossbell/network";
-import { Contract } from "crossbell";
+import { Contract, Numberish } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
+import { getCommunityLists, getList } from "./curation/ls";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
@@ -45,6 +42,9 @@ export default class Nomland {
     processDiscussion() {}
     ls(c: Accountish) {
         return getCommunityLists(this.#appName, c);
+    }
+    lsById(id: Numberish) {
+        return getList(this.#appName, id);
     }
     add(c: Accountish, l: string) {
         return createCurationList(this.#appName, this.#appKeyOrProvider, c, l);

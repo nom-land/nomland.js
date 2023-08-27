@@ -1,3 +1,4 @@
+import { NoteEntity } from "crossbell";
 import { Accountish } from "./account";
 
 export interface CurationReason {
@@ -24,4 +25,28 @@ export interface Curation {
 export interface NoteId {
     characterId: number | bigint;
     noteId: number | bigint;
+}
+
+export interface CurationListData {
+    curationList: CurationNote[];
+    curationStat: Map<string, CurationStat>; // curationId -> CurationStat
+}
+
+export interface CurationNote {
+    postId: string; // postId is {curationId}-{noteId}
+    raw: NoteEntity;
+    dateString: string;
+    title: string;
+    content: string;
+    curatorAvatars: string[];
+    curatorName: string;
+    curatorHandle: string;
+    suggestedTags: string[];
+    listNames: string[];
+    recordId: string;
+    communityId: string;
+}
+
+export interface CurationStat {
+    replies: number;
 }
