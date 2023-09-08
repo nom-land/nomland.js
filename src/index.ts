@@ -10,7 +10,16 @@ import * as nw from "crossbell/network";
 import { Contract, Numberish } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
-import { getCommunityLists, getList, getNote, getReplies } from "./curation/ls";
+import {
+    getCharacter,
+    getCommunityLists,
+    getList,
+    getMembers,
+    getNote,
+    getRecordStats,
+    getReplies,
+    getRepliesCount,
+} from "./curation/ls";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
@@ -58,13 +67,23 @@ export default class Nomland {
     getDiscussions(characterId: Numberish, noteId: Numberish) {
         return getReplies(characterId, noteId);
     }
+    getDiscussionsCount(characterId: Numberish, noteId: Numberish) {
+        return getRepliesCount(characterId, noteId);
+    }
     add(c: Accountish, l: string) {
         return createCurationList(this.#appName, this.#appKeyOrProvider, c, l);
     }
     balanceOf(owner: `0x${string}`) {
-        console.log(crossbell.id);
-
         return new Contract(undefined).csb.getBalance({ owner });
+    }
+    getCommunityMembers(communityId: Numberish) {
+        return getMembers(this.#appName, communityId);
+    }
+    getCharacter(id: Numberish) {
+        return getCharacter(id);
+    }
+    getRecordStats(recordId: Numberish) {
+        return getRecordStats(recordId);
     }
 }
 
