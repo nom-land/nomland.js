@@ -53,7 +53,7 @@ export default class Nomland {
     ls(c: Accountish) {
         return getCommunityLists(this.#appName, c);
     }
-    /* Linklist id */
+    /* get curations by linklist id */
     lsById(id: Numberish) {
         return getList(this.#appName, id);
     }
@@ -61,12 +61,15 @@ export default class Nomland {
     getMetadataById(id: Numberish) {
         return getList(this.#appName, id, true);
     }
+    /* Get curation note data */
     getCuration(characterId: Numberish, noteId: Numberish) {
         return getNote(characterId, noteId, "curation");
     }
+    /* Get discussions toward a note */
     getDiscussions(characterId: Numberish, noteId: Numberish) {
         return getReplies(characterId, noteId);
     }
+    /* Get count of discussions toward a note */
     getDiscussionsCount(characterId: Numberish, noteId: Numberish) {
         return getRepliesCount(characterId, noteId);
     }

@@ -245,6 +245,8 @@ export async function getReplies(characterId: Numberish, noteId: Numberish) {
         toCharacterId: characterId,
         toNoteId: noteId,
         includeCharacter: true,
+        orderBy: "createdAt",
+        order: "asc",
     });
     const replies = data.list.map((n) => {
         return getCuration(n);
