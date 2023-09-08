@@ -10,7 +10,7 @@ import * as nw from "crossbell/network";
 import { Contract, Numberish } from "crossbell";
 import { Curation } from "./types/curation";
 import { type EIP1193Provider } from "eip1193-types";
-import { getCommunityLists, getList } from "./curation/ls";
+import { getCommunityLists, getList, getNote, getReplies } from "./curation/ls";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
@@ -51,6 +51,12 @@ export default class Nomland {
     /* Linklist id */
     getMetadataById(id: Numberish) {
         return getList(this.#appName, id, true);
+    }
+    getCuration(characterId: Numberish, noteId: Numberish) {
+        return getNote(characterId, noteId, "curation");
+    }
+    getDiscussions(characterId: Numberish, noteId: Numberish) {
+        return getReplies(characterId, noteId);
     }
     add(c: Accountish, l: string) {
         return createCurationList(this.#appName, this.#appKeyOrProvider, c, l);
