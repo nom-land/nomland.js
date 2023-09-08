@@ -42,24 +42,35 @@ export async function getCommunityLists(appName: string, c: Accountish) {
     return { count, list };
 }
 
-export async function getList(appName: string, id: Numberish) {
+export async function getList(
+    appName: string,
+    id: Numberish,
+    meta: boolean = false
+) {
     const indexer = createIndexer();
-    const { list } = await indexer.link.getManyByLinklistId(id);
-    console.log(list);
+    const { list, count } = await indexer.link.getManyByLinklistId(id);
+
     const fromCharacterId = list[0].fromCharacterId;
     if (!fromCharacterId) throw new Error("No fromCharacterId");
 
     const lastUpdated = list[0].createdAt;
-
     const linkType = list[0].linkType;
+    const listName = linkType.slice(getListLinkTypePrefix(appName).length);
+
+    if (meta) {
+        return {
+            listName,
+            communityId: fromCharacterId,
+            count,
+            lastUpdated,
+        };
+    }
+
     const c = createContract();
     const { data: records } = await c.link.getLinkingCharacters({
         fromCharacterId,
         linkType,
     });
-
-    const listName = linkType.slice(getListLinkTypePrefix(appName).length);
-
     const curationData = new Map<string, CurationListData>();
     await Promise.all(
         records.reverse().map(async (r) => {
@@ -78,6 +89,7 @@ export async function getList(appName: string, id: Numberish) {
         listName,
         communityId: fromCharacterId,
         records,
+        count,
         curationData, // record -> curations
         lastUpdated,
     };

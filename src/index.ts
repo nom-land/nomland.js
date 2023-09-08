@@ -40,11 +40,17 @@ export default class Nomland {
         return processCuration(c, url, this.#appKeyOrProvider, this.#appName);
     }
     processDiscussion() {}
+    /* Community id */
     ls(c: Accountish) {
         return getCommunityLists(this.#appName, c);
     }
+    /* Linklist id */
     lsById(id: Numberish) {
         return getList(this.#appName, id);
+    }
+    /* Linklist id */
+    getMetadataById(id: Numberish) {
+        return getList(this.#appName, id, true);
     }
     add(c: Accountish, l: string) {
         return createCurationList(this.#appName, this.#appKeyOrProvider, c, l);
