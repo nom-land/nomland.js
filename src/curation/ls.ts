@@ -1,4 +1,4 @@
-import { getListLinkTypePrefix } from "../utils";
+import { getListLinkTypePrefix, getMembersLinkType } from "../utils";
 import { getLinks } from "../crossbell";
 import { Accountish } from "../types/account";
 import {
@@ -250,4 +250,47 @@ export async function getReplies(characterId: Numberish, noteId: Numberish) {
         return getCuration(n);
     });
     return replies;
+}
+export async function getRepliesCount(
+    characterId: Numberish,
+    noteId: Numberish
+) {
+    const indexer = createIndexer();
+    const { count } = await indexer.note.getMany({
+        toCharacterId: characterId,
+        toNoteId: noteId,
+        limit: 0,
+    });
+
+    return count;
+}
+
+export async function getMembers(appName: string, communityId: Numberish) {
+    const c = createContract();
+
+    const { data } = await c.link.getLinkingCharacters({
+        fromCharacterId: communityId,
+        linkType: getMembersLinkType(appName),
+    });
+    return data;
+}
+
+export async function getCharacter(id: Numberish) {
+    const c = createContract();
+
+    const { data } = await c.character.get({
+        characterId: id,
+    });
+    return data;
+}
+
+export async function getRecordStats(recordId: Numberish) {
+    const indexer = createIndexer();
+    const backLinks = await indexer.link.getBacklinksOfCharacter(recordId); //TODO: limit...
+
+    const backNotes = await indexer.note.getMany({
+        toCharacterId: recordId,
+        includeCharacter: true,
+    });
+    return { backLinks, backNotes };
 }
