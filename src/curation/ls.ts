@@ -95,6 +95,31 @@ export async function getList(
     };
 }
 
+export async function getNote(
+    characterId: Numberish,
+    noteId: Numberish,
+    entityType?: string
+) {
+    const c = createContract();
+
+    const { data: cData } = await c.character.get({
+        characterId,
+    });
+    const { data: n } = await c.note.get({
+        characterId,
+        noteId,
+    });
+    const attrs = n.metadata?.attributes;
+    if (entityType) {
+        const entityType = getAttr(attrs, "entity type");
+        if (entityType !== entityType) return;
+    }
+
+    const curationNote = getCuration(n, cData);
+
+    return curationNote;
+}
+
 export function getCuration(
     n:
         | Note<
@@ -212,4 +237,17 @@ export async function getCurationData(
     );
 
     return { curationList, curationStat } as CurationListData;
+}
+
+export async function getReplies(characterId: Numberish, noteId: Numberish) {
+    const indexer = createIndexer();
+    const data = await indexer.note.getMany({
+        toCharacterId: characterId,
+        toNoteId: noteId,
+        includeCharacter: true,
+    });
+    const replies = data.list.map((n) => {
+        return getCuration(n);
+    });
+    return replies;
 }
