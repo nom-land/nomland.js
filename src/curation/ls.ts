@@ -1,5 +1,9 @@
-import { getListLinkTypePrefix, getMembersLinkType } from "../utils";
-import { getLinks } from "../crossbell";
+import {
+    getListLinkTypePrefix,
+    getMembersLinkType,
+    linkType2Name,
+} from "../utils";
+import { getIdBy } from "../crossbell";
 import { Accountish } from "../types/account";
 import {
     Character,
@@ -24,19 +28,50 @@ import {
     CurationStat,
 } from "../types/curation";
 import { getAttr } from "./utils";
+import { client } from "../apis/graphql";
+import { gql } from "@urql/core";
 
-export async function getCommunityLists(appName: string, c: Accountish) {
-    const links = await getLinks(c);
-    const list = links.list
-        .filter((l) => l.linkType.startsWith(getListLinkTypePrefix(appName)))
-        .map((l) => {
-            return {
-                listName: l.linkType.slice(
-                    getListLinkTypePrefix(appName).length
-                ),
-                listId: l.linklistId,
-            };
-        });
+export async function getCommunityLists(appName: string, acc: Accountish) {
+    const communityId = await getIdBy(acc);
+    if (communityId === 0) return { count: 0, list: [] };
+    const { data } = await client
+        .query(
+            gql`
+                query getCommunityLists(
+                    $communityId: Int!
+                    $linkType: String!
+                ) {
+                    linklists(
+                        where: {
+                            fromCharacterId: { equals: $communityId }
+                            linkType: { startsWith: $linkType }
+                        }
+                        orderBy: { createdAt: desc }
+                    ) {
+                        linkType
+                        linklistId
+                        _count {
+                            links
+                        }
+                    }
+                }
+            `,
+            {
+                communityId: Number(communityId),
+                linkType: getListLinkTypePrefix(appName),
+            }
+        )
+        .toPromise();
+
+    console.log(communityId, data);
+    const list = data.linklists.map((l: any) => {
+        return {
+            listName: linkType2Name(appName, l.linkType),
+            listId: l.linklistId,
+            count: l._count.links,
+        };
+    });
+
     const count = list.length;
 
     return { count, list };
@@ -45,7 +80,7 @@ export async function getCommunityLists(appName: string, c: Accountish) {
 export async function getList(
     appName: string,
     id: Numberish,
-    meta: boolean = false
+    includeCurations: boolean = false
 ) {
     const indexer = createIndexer();
     const { list, count } = await indexer.link.getManyByLinklistId(id);
@@ -57,7 +92,7 @@ export async function getList(
     const linkType = list[0].linkType;
     const listName = linkType.slice(getListLinkTypePrefix(appName).length);
 
-    if (meta) {
+    if (!includeCurations) {
         return {
             listName,
             communityId: fromCharacterId,
