@@ -48,3 +48,7 @@ export function getListLinkTypePrefix(appName: string) {
 export function getMembersLinkType(appName: string) {
     return `${appPrefix(appName)}-members`;
 }
+
+export function linkType2Name(appName: string, linkType: string) {
+    return linkType.slice(getListLinkTypePrefix(appName).length);
+}

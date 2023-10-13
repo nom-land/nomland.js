@@ -213,8 +213,8 @@ export const setup = async (
     return { admin, contract };
 };
 
-// Get all links of an acc
-export async function getLinks(acc: Accountish) {
+// Get id of an account
+export async function getIdBy(acc: Accountish) {
     let id: Numberish;
     if (typeof acc === "object") {
         const { contract } = await setup();
@@ -223,10 +223,17 @@ export async function getLinks(acc: Accountish) {
             c: contract,
         });
         id = characterId;
-        if (!existed) return { count: 0, list: [] };
+        if (!existed) return 0;
     } else {
         id = acc;
     }
+    return id;
+}
+
+// Get all links of an acc
+export async function getLinks(acc: Accountish) {
+    const id = await getIdBy(acc);
+    if (id === 0) return { count: 0, list: [] };
     const indexer = createIndexer();
     return await indexer.linklist.getMany(id, { limit: 1000 });
     // TODO: add pagination

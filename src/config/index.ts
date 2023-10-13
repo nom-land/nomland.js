@@ -19,4 +19,5 @@ const botConfig = {
 
 export const settings = {
     botConfig,
+    graphqlEndpoint: "https://indexer.crossbell.io/v1/graphql",
 };
