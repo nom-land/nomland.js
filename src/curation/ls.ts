@@ -26,6 +26,7 @@ import {
     CurationListData,
     CurationNote,
     CurationStat,
+    ListData,
 } from "../types/curation";
 import { getAttr } from "./utils";
 import { client } from "../apis/graphql";
@@ -70,11 +71,6 @@ export async function getCommunityLists(appName: string, acc: Accountish) {
         _count: {
             links: number;
         };
-    }
-    interface ListData {
-        listName: string;
-        listId: number;
-        count: number;
     }
 
     const list: ListData[] = data.linklists.map((l: Link) => {

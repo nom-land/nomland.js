@@ -50,3 +50,9 @@ export interface CurationNote {
 export interface CurationStat {
     replies: number;
 }
+
+export interface ListData {
+    listName: string;
+    listId: number;
+    count: number;
+}
