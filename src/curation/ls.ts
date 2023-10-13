@@ -64,7 +64,20 @@ export async function getCommunityLists(appName: string, acc: Accountish) {
         .toPromise();
 
     console.log(communityId, data);
-    const list = data.linklists.map((l: any) => {
+    interface Link {
+        linkType: string;
+        linklistId: number;
+        _count: {
+            links: number;
+        };
+    }
+    interface ListData {
+        listName: string;
+        listId: number;
+        count: number;
+    }
+
+    const list: ListData[] = data.linklists.map((l: Link) => {
         return {
             listName: linkType2Name(appName, l.linkType),
             listId: l.linklistId,
