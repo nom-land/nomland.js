@@ -63,8 +63,6 @@ export async function getCommunityLists(appName: string, acc: Accountish) {
             }
         )
         .toPromise();
-
-    console.log(communityId, data);
     interface Link {
         linkType: string;
         linklistId: number;
@@ -311,14 +309,35 @@ export async function getRepliesCount(
     return count;
 }
 
-export async function getMembers(appName: string, communityId: Numberish) {
-    const c = createContract();
+export async function getMembers(
+    appName: string,
+    communityId: Numberish,
+    useContract?: false
+) {
+    if (useContract) {
+        const c = createContract();
 
-    const { data } = await c.link.getLinkingCharacters({
-        fromCharacterId: communityId,
-        linkType: getMembersLinkType(appName),
-    });
-    return data;
+        const { data } = await c.link.getLinkingCharacters({
+            fromCharacterId: communityId,
+            linkType: getMembersLinkType(appName),
+        });
+        return data;
+    } else {
+        const indexer = createIndexer();
+        const data = await indexer.link.getMany(communityId, {
+            linkType: getMembersLinkType(appName),
+        });
+        return data.list.map((l) => {
+            return {
+                characterId: BigInt(l.toCharacterId || 0),
+                handle: l.toCharacter?.handle,
+                uri: l.toUri,
+                metadata: l.toCharacter?.metadata?.content,
+                socialToken: l.toCharacter?.socialToken,
+                noteCount: BigInt(0), //TODO
+            } as Character;
+        });
+    }
 }
 
 export async function getCharacter(id: Numberish) {
