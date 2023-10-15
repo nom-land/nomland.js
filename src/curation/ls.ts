@@ -106,35 +106,120 @@ export async function getList(
             count,
             lastUpdated,
         };
+    } else {
+        const { data } = await client.query(
+            gql`
+                # query getListData($appName: String!, $listName: String!) {
+                query getListData() {
+                    notes(
+                        where: {
+                            AND: [
+                                {
+                                    metadata: {
+                                        AND: [
+                                            {
+                                                content: {
+                                                    path: ["attributes"]
+                                                    array_contains: [
+                                                        {
+                                                            trait_type: "entity type"
+                                                            value: "curation"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                            {
+                                                content: {
+                                                    path: ["sources"]
+                                                    array_contains: ["${appName}"]  # TODO why js var rather than $xxx
+                                                }
+                                            }
+                                            {
+                                                content: {
+                                                    path: ["attributes"]
+                                                    array_contains: [
+                                                        {
+                                                            trait_type: "curation lists"
+                                                            value: "[\\"${listName}\\"]" #TODO why? \\ ??
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                        orderBy: {
+                            createdAt: desc
+                          }
+                        take: 10 #TODO
+                    ) {
+                        characterId
+                        character{
+                            handle
+                            metadata {
+                              content
+                            }
+                          }
+                        noteId
+                        metadata {
+                            content
+                        }
+                        toCharacterId
+                        toCharacter {
+                            toLinks {
+                                linklistId
+                            }
+                        }
+                    
+                        _count {
+                            fromNotes
+                        }
+                        owner
+                        operator
+                        createdAt
+                    }
+                }
+            `,
+            {
+                // appName,
+                // listName,
+            }
+        );
+
+        const curationNotes: {
+            n: CurationNote;
+            stat: CurationStat;
+        }[] = data.notes.map(
+            (
+                n: NoteEntity & {
+                    _count: {
+                        fromNotes: {
+                            n: Number;
+                        };
+                    };
+                }
+            ) => {
+                const repliesCount = n._count.fromNotes;
+                return {
+                    note: getCuration(n),
+                    stat: {
+                        replies: repliesCount,
+                    },
+                };
+            }
+        );
+        console.log("curationNotes", curationNotes);
+
+        return {
+            listName,
+            communityId: fromCharacterId,
+            count,
+            curationNotes,
+            lastUpdated,
+        };
     }
-
-    const c = createContract();
-    const { data: records } = await c.link.getLinkingCharacters({
-        fromCharacterId,
-        linkType,
-    });
-    const curationData = new Map<string, CurationListData>();
-    await Promise.all(
-        records.reverse().map(async (r) => {
-            curationData.set(
-                r.characterId.toString(),
-                await getCurationData(
-                    r.characterId.toString(),
-                    fromCharacterId.toString(),
-                    listName
-                )
-            );
-        })
-    );
-
-    return {
-        listName,
-        communityId: fromCharacterId,
-        records,
-        count,
-        curationData, // record -> curations
-        lastUpdated,
-    };
 }
 
 export async function getNote(
@@ -181,8 +266,7 @@ export function getCuration(
     if ("character" in n) {
         c = n.character;
         nMetadata = n.metadata?.content;
-        cMetadata = n.character?.metadata?.content;
-        n.character?.handle;
+        cMetadata = c?.metadata?.content;
     } else {
         if (!c) throw new Error("c is undefined");
         nMetadata = n.metadata as NoteMetadata;
