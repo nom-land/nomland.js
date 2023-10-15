@@ -203,7 +203,7 @@ export async function getList(
             ) => {
                 const repliesCount = n._count.fromNotes;
                 return {
-                    note: getCuration(n),
+                    n: getCuration(n),
                     stat: {
                         replies: repliesCount,
                     },
