@@ -168,6 +168,9 @@ export async function getList(
                         }
                         toCharacterId
                         toCharacter {
+                            metadata{
+                                content
+                            }
                             toLinks {
                                 linklistId
                             }
@@ -204,6 +207,9 @@ export async function getList(
                 const repliesCount = n._count.fromNotes;
                 return {
                     n: getCuration(n),
+                    record: {
+                        title: (n.toCharacter?.metadata?.content as any)?.title,
+                    },
                     stat: {
                         replies: repliesCount,
                     },
