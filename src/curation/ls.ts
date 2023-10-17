@@ -193,6 +193,9 @@ export async function getList(
 
         const curationNotes: {
             n: CurationNote;
+            record: {
+                title: string;
+            };
             stat: CurationStat;
         }[] = data.notes.map(
             (
@@ -216,7 +219,6 @@ export async function getList(
                 };
             }
         );
-        console.log("curationNotes", curationNotes);
 
         return {
             listName,
