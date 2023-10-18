@@ -235,22 +235,18 @@ export async function getNote(
     noteId: Numberish,
     entityType?: string
 ) {
-    const c = createContract();
+    const i = createIndexer();
+    const n = await i.note.get(characterId, noteId);
+    if (!n) return;
 
-    const { data: cData } = await c.character.get({
-        characterId,
-    });
-    const { data: n } = await c.note.get({
-        characterId,
-        noteId,
-    });
-    const attrs = n.metadata?.attributes;
+    const attrs = n?.metadata?.content?.attributes;
+
     if (entityType) {
         const entityType = getAttr(attrs, "entity type");
         if (entityType !== entityType) return;
     }
 
-    const curationNote = getCuration(n, cData);
+    const curationNote = getCuration(n);
 
     return curationNote;
 }
