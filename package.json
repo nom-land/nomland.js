@@ -1,6 +1,6 @@
 {
   "name": "nomland.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "nomland.js is a library to interact with the nomland protocol.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,6 +15,9 @@
       "import": "./dist/index.mjs"
     },
     "./*": "./*"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "scripts": {
     "build": "tsup --dts",
