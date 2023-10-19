@@ -235,18 +235,43 @@ export async function getNote(
     noteId: Numberish,
     entityType?: string
 ) {
-    const i = createIndexer();
-    const n = await i.note.get(characterId, noteId);
-    if (!n) return;
+    const note = await client.query(
+        gql`{
+            note(where: { characterId_noteId: { noteId: ${noteId.toString()}, characterId: ${characterId.toString()} } }) {
+                characterId
+                noteId
+                character {
+                handle
+                metadata{
+                    content
+                }
+                }
+                metadata {
+                content
+                }
+                toCharacter{
+                handle
+                metadata{
+                    content
+                }
+                }
+                _count{
+                    fromNotes
+                  }
+            }
+        }`,
+        {}
+    );
 
-    const attrs = n?.metadata?.content?.attributes;
+    const attrs = note.data.note.metadata?.content?.attributes;
 
     if (entityType) {
         const entityType = getAttr(attrs, "entity type");
         if (entityType !== entityType) return;
     }
 
-    const curationNote = getCuration(n);
+    const curationNote = getCuration(note.data.note);
+    curationNote.replies = note.data.note._count.fromNotes;
 
     return curationNote;
 }
