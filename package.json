@@ -16,18 +16,21 @@
     },
     "./*": "./*"
   },
-
   "scripts": {
     "build": "tsup --dts",
-    "prepublish": "npm run build"
+    "lint": "tsc --noEmit",
+    "prepublish": "npm run build",
+    "release": "pnpm run build && changeset publish"
   },
   "keywords": [
     "nomland"
   ],
   "license": "MIT",
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@types/bunyan": "^1.8.8",
     "@types/md5": "^2.3.2",
+    "@types/punycode": "^2.1.1",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   },
