@@ -45,6 +45,7 @@ export interface CurationNote {
     listNames: string[];
     recordId: string;
     communityId: string;
+    replies?: number;
 }
 
 export interface CurationStat {
