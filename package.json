@@ -8,6 +8,7 @@
   "files": [
     "dist"
   ],
+  "url": "https://github.com/nom-land/nomland.js.git",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
