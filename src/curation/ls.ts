@@ -145,6 +145,14 @@ export async function getList(
                                                     ]
                                                 }
                                             }
+                                            {
+                                                content: {
+                                                  path: ["attributes"]
+                                                  array_contains: [
+                                                    { trait_type: "curation community", value: ${fromCharacterId.toString()} }
+                                                  ]
+                                                }
+                                            }
                                         ]
                                     }
                                 }
