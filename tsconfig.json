@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    "outDir": "dist",
     "lib": ["es2022", "dom", "DOM.Iterable"],
     "strict": true,
     "esModuleInterop": true,

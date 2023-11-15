@@ -1,7 +1,7 @@
 import { type Options, defineConfig } from "tsup";
 
 const commonConfig: Options = {
-    entry: ["./src/*.ts"],
+    // entry: ["./src/*.ts"],
     outDir: "dist",
     clean: true,
     sourcemap: true,
@@ -11,6 +11,7 @@ const commonConfig: Options = {
 export default defineConfig((options) => [
     {
         ...commonConfig,
+        entry: ["./src/index.node.ts"],
         format: ["cjs", "esm"],
         platform: "node",
         dts: options.dts,
@@ -18,6 +19,7 @@ export default defineConfig((options) => [
     },
     {
         ...commonConfig,
+        entry: ["./src/index.ts"],
         format: ["iife"],
         globalName: "Nomland",
         minify: !options.watch,

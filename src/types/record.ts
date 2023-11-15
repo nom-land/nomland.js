@@ -1,3 +1,4 @@
+// TODO: upgrade record type with considering entity types...
 export interface Record {
     url: string;
     title?: string;
