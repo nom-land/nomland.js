@@ -60,14 +60,6 @@ export interface ExtractusArticleData {
 }
 
 type Parser = "elephant" | "extractus";
-const parsers = {
-    elephant: {
-        module: "elephant-sdk",
-    },
-    extractus: {
-        module: "@extractus/article-extractor",
-    },
-};
 
 function formatElephantData(data: EleEntry, baseEntity: BaseEntity): Entity {
     return {
@@ -134,7 +126,7 @@ async function extractData(url: string, parser: "elephant" | "extractus"): Promi
     }
 }
 
-export async function parseRecord(url: string, parser: Parser) {
+export async function parseRecord(url: string, parser: Parser = "extractus") {
     let article: Entity = await extractData(url, parser);
 
     return {
