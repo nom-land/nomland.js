@@ -59,71 +59,83 @@ export interface ExtractusArticleData {
     ttr?: number;
 }
 
-export async function parseRecord(url: string, parser: "elephant" | "extractus" = "extractus") {
-    let article: Entity | null = null;
+type Parser = "elephant" | "extractus";
+const parsers = {
+    elephant: {
+        module: "elephant-sdk",
+    },
+    extractus: {
+        module: "@extractus/article-extractor",
+    },
+};
 
+function formatElephantData(data: EleEntry, baseEntity: BaseEntity): Entity {
+    return {
+        title: data.name,
+        description: "",
+        covers: [],
+        type: data.type,
+        metaData: {
+            platform: data.platform,
+            ...data.metaData,
+        },
+        ...baseEntity,
+    };
+}
+
+function formatExtractusData(data: ExtractusArticleData, baseEntity: BaseEntity): Entity {
+    return {
+        title: data.title,
+        description: data.description,
+        covers: [
+            {
+                address: data.image,
+            },
+        ],
+        type: "post",
+        links: data.links,
+        metaData: {
+            type: "post",
+            platform: data.source,
+            authors: [data.author || ""],
+            language: "unknown",
+        },
+        ...baseEntity,
+    } as Entity;
+}
+
+async function extractData(url: string, parser: "elephant" | "extractus"): Promise<Entity> {
     const baseEntity = {
         url,
         version: "20231115",
         parser,
     } as BaseEntity;
 
-    let useNextParser = false;
-    if (parser === "elephant") {
-        try {
-            import("elephant-sdk").then(async ({ extract }) => {
+    switch (parser) {
+        case "elephant":
+            try {
+                const { extract } = await import("elephant-sdk");
                 const data = (await extract(url)) as EleEntry;
-                article = {
-                    title: data.name,
-                    description: "",
-                    covers: [],
-                    type: data.type,
-                    metaData: {
-                        platform: data.platform,
-                        ...data.metaData,
-                    },
-                    ...baseEntity,
-                } as Entity;
-            });
-            useNextParser = false;
-        } catch (e) {
-            log.error(e);
-            useNextParser = true;
-        }
-    }
-    if (useNextParser || parser === "extractus") {
-        try {
-            import("@extractus/article-extractor").then(async ({ extract }) => {
+                return formatElephantData(data, baseEntity);
+            } catch (e) {
+                log.error(e);
+                // If there's error, don't break and just try the next one.
+            }
+        case "extractus":
+            try {
+                const { extract } = await import("@extractus/article-extractor");
                 const data = (await extract(url)) as ExtractusArticleData;
-                article = {
-                    title: data.title,
-                    description: data.description,
-                    covers: [
-                        {
-                            address: data.image,
-                        },
-                    ],
-                    type: "post",
-                    links: data.links,
-                    metaData: {
-                        type: "post",
-                        platform: data.source,
-                        authors: [data.author || ""],
-                        language: "unknown",
-                    },
-                    ...baseEntity,
-                } as Entity;
-            });
-            useNextParser = false;
-        } catch (e) {
-            log.error(e);
-            useNextParser = true;
-        }
+                return formatExtractusData(data, baseEntity);
+            } catch (e) {
+                log.error(e);
+            }
+        default:
+            return baseEntity;
     }
+}
 
-    if (!article || useNextParser)
-        // TODO: customized parser
-        article = baseEntity;
+export async function parseRecord(url: string, parser: Parser) {
+    let article: Entity = await extractData(url, parser);
 
     return {
         ...article,
