@@ -78,7 +78,7 @@ interface DigitalContent<Derivation extends "translation" | "original"> {
     /**
      * The update date of the content.
      */
-    updateDate?: string;
+    lastModified?: string;
     /**
      * The copyright of the content.
      */
