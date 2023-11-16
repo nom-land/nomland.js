@@ -2,20 +2,28 @@
   "name": "nomland.js",
   "version": "0.1.5",
   "description": "nomland.js is a library to interact with the nomland protocol.",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.mjs",
+  "main": "./dist/node/index.node.js",
+  "types": "./dist/node/index.node.d.ts",
+  "module": "./dist/node/index.node.mjs",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
   ],
   "url": "https://github.com/nom-land/nomland.js.git",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+    "./node": {
+      "require": "./dist/node/index.node.js",
+      "import": "./dist/node/index.node.mjs",
+      "types": "./dist/node/index.node.d.ts"
     },
-    "./*": "./*"
+    "./browser": {
+      "require": "./dist/browser/index.browser.js",
+      "import": "./dist/browser/index.browser.js",
+      "types": "./dist/browser/index.browser.d.ts"
+    },
+    ".": "./dist/node/index.node.js"
   },
   "scripts": {
     "build": "tsup --dts",

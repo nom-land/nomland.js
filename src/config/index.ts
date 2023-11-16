@@ -3,7 +3,7 @@ export interface BotConfig {
 }
 
 const botConfig = {
-    prod: true,
+    prod: process.env.NODE_ENV === "development" ? false : true,
 } as BotConfig;
 
 export const settings = {

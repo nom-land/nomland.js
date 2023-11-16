@@ -3,7 +3,7 @@ import NomlandBase from "./index";
 import { type EIP1193Provider } from "eip1193-types";
 import { Accountish, Curation } from "./types";
 
-export class NomlandNode extends NomlandBase {
+export default class NomlandNode extends NomlandBase {
     #appKeyOrProvider: `0x${string}` | EIP1193Provider;
 
     constructor(appName: string, appKeyOrProvider?: `0x${string}`) {

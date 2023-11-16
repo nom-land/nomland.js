@@ -134,7 +134,8 @@ export async function processCuration(
     appName: string
 ) {
     const { curator, community, lists, reason, raw: rawData } = curation;
-    const { contract, admin } = await setup(adminPrivateKeyOrProvider);
+
+    const { contract, admin } = setup(adminPrivateKeyOrProvider);
     if (!rawData) log.warn("rawData is not defined");
     log.info("[DEBUG] Contract has been setup");
 

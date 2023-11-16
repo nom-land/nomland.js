@@ -195,22 +195,24 @@ export const getCharacter = async (
     return characterId;
 };
 
-export const setup = async (
-    priKeyOrProvider?: `0x${string}` | EIP1193Provider
-) => {
+export const setup = (priKeyOrProvider?: `0x${string}` | EIP1193Provider) => {
     // if prikey is not provided, use the `0x0`
-    if (!priKeyOrProvider) {
-        const contract = new Contract(undefined);
-        return { admin: "0x0" as `0x${string}`, contract };
+    try {
+        if (!priKeyOrProvider) {
+            const contract = new Contract(undefined);
+            return { admin: "0x0" as `0x${string}`, contract };
+        }
+        // const admin = privateKeyToAddress(priKeyOrProvider);
+        const admin =
+            typeof priKeyOrProvider === "string"
+                ? privateKeyToAddress(priKeyOrProvider)
+                : getProviderAccount(priKeyOrProvider)?.address;
+        const contract = new Contract(priKeyOrProvider);
+        if (admin === undefined) throw new Error("account is undefined");
+        return { admin, contract };
+    } catch (e) {
+        throw new Error("Fail to setup account. " + e);
     }
-    // const admin = privateKeyToAddress(priKeyOrProvider);
-    const admin =
-        typeof priKeyOrProvider === "string"
-            ? privateKeyToAddress(priKeyOrProvider)
-            : getProviderAccount(priKeyOrProvider)?.address;
-    const contract = new Contract(priKeyOrProvider);
-    if (admin === undefined) throw new Error("account is undefined");
-    return { admin, contract };
 };
 
 // Get id of an account

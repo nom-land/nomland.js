@@ -1,5 +1,4 @@
 import { type Options, defineConfig } from "tsup";
-import { copy } from "esbuild-plugin-copy";
 
 const commonConfig: Options = {
     // entry: ["./src/*.ts"],
@@ -7,16 +6,6 @@ const commonConfig: Options = {
     clean: true,
     sourcemap: true,
     treeshake: true,
-    esbuildPlugins: [
-        copy({
-            assets: {
-                // TODO: LICENSE
-                from: ["./package.json", "./README.md"],
-                to: ["./package.json", "./README.md"],
-            },
-            watch: true,
-        }),
-    ],
 };
 
 export default defineConfig((options) => [
@@ -24,18 +13,32 @@ export default defineConfig((options) => [
         ...commonConfig,
         entry: ["./src/index.node.ts"],
         format: ["cjs", "esm"],
+        outDir: "dist/node",
         platform: "node",
-        dts: options.dts,
+        dts: true,
         target: "node16.14",
     },
     {
         ...commonConfig,
         entry: ["./src/index.ts"],
         format: ["iife"],
+        outDir: "dist/browser",
+        outExtension: () => {
+            return {
+                js: ".browser.js",
+                dts: ".browser.d.ts",
+            };
+        },
         globalName: "Nomland",
         minify: !options.watch,
         platform: "browser",
-        dts: false,
+        dts: options.dts,
         target: "es2020",
+        env: {
+            NODE_ENV: "production",
+        },
+        define: {
+            "process.env.NODE_ENV": '"production"',
+        },
     },
 ]);

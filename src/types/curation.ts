@@ -20,6 +20,7 @@ export interface Curation {
     lists: string[];
     reason: CurationReason;
     raw?: RawCuration; // raw is only recorded, not be parsed
+    raws?: RawCuration[]; // raw is only recorded, not be parsed
 }
 
 export interface NoteId {

@@ -1,5 +1,3 @@
-import { settings } from "../config";
-
 import md5 from "md5";
 // const punycode = require("punycode/");
 import punycode from "punycode/";
@@ -27,12 +25,12 @@ export function feedbackUrl(
     curatorId: string,
     noteId: string
 ) {
-    if (settings.botConfig.prod === false) {
-        // return `https://colib-home.vercel.app/community/${cid}/record/${rid}`;
-        return `https://colib-home.vercel.app/curation/${curatorId}-${noteId}`;
-    } else {
-        return `https://colib.app/curation/${curatorId}-${noteId}`;
-    }
+    // if (settings.botConfig.prod === false) {
+    // return `https://colib-home.vercel.app/community/${cid}/record/${rid}`;
+    // return `https://colib-home.vercel.app/curation/${curatorId}-${noteId}`;
+    // } else {
+    return `https://colib.app/curation/${curatorId}-${noteId}`;
+    // }
 }
 
 const appPrefix = (appName: string) => appName.slice(0, 2);

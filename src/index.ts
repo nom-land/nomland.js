@@ -8,7 +8,17 @@ import { crossbell } from "crossbell/network";
 import * as nw from "crossbell/network";
 import { Contract, Numberish } from "crossbell";
 
-import { getCharacter, getCommunityLists, getList, getMembers, getNote, getRecordStats, getReplies, getRepliesCount } from "./curation/ls";
+import {
+    getCharacter,
+    getCommunityLists,
+    getList,
+    getMembers,
+    getNote,
+    getRecordStats,
+    getReplies,
+    getRepliesCount,
+} from "./curation/ls";
+import { settings } from "./config";
 //Localhost
 if (process.env.NODE_ENV === "local") {
     (crossbell.id as any) = 31337;
@@ -51,6 +61,28 @@ export default class NomlandBase {
     getDiscussionsCount(characterId: Numberish, noteId: Numberish) {
         return getRepliesCount(characterId, noteId);
     }
+    /* Get tags and list */
+    async getTagsAndLists(tagsOrList: string[], c: Accountish) {
+        tagsOrList = tagsOrList.map((t) =>
+            t.startsWith("#") ? t.slice(1) : t
+        );
+        const listNames = (await getCommunityLists(this.appName, c)).list.map(
+            (l) => l.listName
+        );
+
+        const tagSuggestions = [] as string[];
+        const listSuggestions = [] as string[];
+
+        tagsOrList?.forEach((tagOrList) => {
+            if (listNames.includes(tagOrList)) {
+                listSuggestions.push(tagOrList);
+            } else {
+                tagSuggestions.push(tagOrList);
+            }
+        });
+
+        return { tagSuggestions, listSuggestions };
+    }
 
     balanceOf(owner: `0x${string}`) {
         return new Contract(undefined).csb.getBalance({ owner });
@@ -63,5 +95,8 @@ export default class NomlandBase {
     }
     getRecordStats(recordId: Numberish) {
         return getRecordStats(recordId);
+    }
+    getConfig() {
+        return settings;
     }
 }
