@@ -1,4 +1,5 @@
 import { type Options, defineConfig } from "tsup";
+import { copy } from "esbuild-plugin-copy";
 
 const commonConfig: Options = {
     // entry: ["./src/*.ts"],
@@ -6,6 +7,16 @@ const commonConfig: Options = {
     clean: true,
     sourcemap: true,
     treeshake: true,
+    esbuildPlugins: [
+        copy({
+            assets: {
+                // TODO: LICENSE
+                from: ["./package.json", "./README.md"],
+                to: ["./package.json", "./README.md"],
+            },
+            watch: true,
+        }),
+    ],
 };
 
 export default defineConfig((options) => [
