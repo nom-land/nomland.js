@@ -1,13 +1,25 @@
 import { log } from "../utils/log";
-import { Record } from "../types/record";
+import { Parser, Record } from "../types/record";
 import { BaseEntity, Entity } from "./entity/entityTypes";
 
 export interface EleEntry {
     url: string;
-    platform?: "mp.weixin" | "Mirror" | "Medium" | "Matters" | "Personal Blog" | "Other" | "douban";
+    platform?:
+        | "mp.weixin"
+        | "Mirror"
+        | "Medium"
+        | "Matters"
+        | "Personal Blog"
+        | "Other"
+        | "douban";
     IPFSUrl?: string;
     name?: string;
-    type?: "post" /* Default type. Any content like a blog post, a tweet post, an article... */ | "book" /* book */ | "video" /* video */ | "podcast" /* podcast */ | "paper" /* academic paper, scholarly articles, formal piece of writing about an academic subject. */;
+    type?:
+        | "post" /* Default type. Any content like a blog post, a tweet post, an article... */
+        | "book" /* book */
+        | "video" /* video */
+        | "podcast" /* podcast */
+        | "paper" /* academic paper, scholarly articles, formal piece of writing about an academic subject. */;
     metaData?: ElePostMetaData | EleBookMetaData;
 }
 
@@ -59,11 +71,9 @@ export interface ExtractusArticleData {
     ttr?: number;
 }
 
-type Parser = "elephant" | "extractus";
-
 function formatElephantData(data: EleEntry, baseEntity: BaseEntity): Entity {
     return {
-        title: data.name,
+        title: data.metaData?.title || "",
         description: "",
         covers: [],
         type: data.type,
@@ -75,9 +85,12 @@ function formatElephantData(data: EleEntry, baseEntity: BaseEntity): Entity {
     };
 }
 
-function formatExtractusData(data: ExtractusArticleData, baseEntity: BaseEntity): Entity {
+function formatExtractusData(
+    data: ExtractusArticleData,
+    baseEntity: BaseEntity
+): Entity {
     return {
-        title: data.title,
+        title: data.title ? data.title : "",
         description: data.description,
         covers: [
             {
@@ -96,7 +109,10 @@ function formatExtractusData(data: ExtractusArticleData, baseEntity: BaseEntity)
     } as Entity;
 }
 
-async function extractData(url: string, parser: "elephant" | "extractus"): Promise<Entity> {
+async function extractData(
+    url: string,
+    parser: "elephant" | "extractus"
+): Promise<Entity> {
     const baseEntity = {
         url,
         version: "20231115",
@@ -106,16 +122,35 @@ async function extractData(url: string, parser: "elephant" | "extractus"): Promi
     switch (parser) {
         case "elephant":
             try {
-                const { extract } = await import("elephant-sdk");
-                const data = (await extract(url)) as EleEntry;
-                return formatElephantData(data, baseEntity);
+                const { extract: eleExtract } = await import("elephant-sdk");
+                const data = (await eleExtract(url)) as EleEntry;
+                const res = formatElephantData(data, baseEntity);
+                // TODO: temporary fix for elephant-sdk
+                const { extract: exExtract } = await import(
+                    "@extractus/article-extractor"
+                );
+                const exData = (await exExtract(
+                    url
+                )) as ExtractusArticleData | null;
+                if (!exData) return res;
+                if (exData.description) res.description = exData.description;
+                if (exData.image)
+                    res.covers = [
+                        {
+                            address: exData.image,
+                        },
+                    ];
+                if (exData.links) res.links = exData.links;
+                return res;
             } catch (e) {
                 log.error(e);
                 // If there's error, don't break and just try the next one.
             }
         case "extractus":
             try {
-                const { extract } = await import("@extractus/article-extractor");
+                const { extract } = await import(
+                    "@extractus/article-extractor"
+                );
                 const data = (await extract(url)) as ExtractusArticleData;
                 return formatExtractusData(data, baseEntity);
             } catch (e) {
@@ -131,7 +166,7 @@ export async function parseRecord(url: string, parser: Parser = "extractus") {
 
     return {
         ...article,
-        record_type: article.type, // TODO: support book/video?
+        record_type: article.type || "post", // TODO: support book/video?
         parsed: true,
     } as Record;
 }

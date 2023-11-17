@@ -1,5 +1,10 @@
 import { Guild } from "discord.js";
-import { Account, PlatformAccount } from "../types/account";
+import {
+    Account,
+    DiscordAccount,
+    TelegramGroup,
+    TelegramUser,
+} from "../types/account";
 import { hashOf } from "../utils";
 
 function parseCommunity(guild: Guild) {
@@ -13,6 +18,27 @@ function parseCommunity(guild: Guild) {
 }
 
 /** This function converts platform account to community id in nomland. */
-export function getAccount(account: PlatformAccount) {
-    parseCommunity(account);
+export function makeAccount(
+    account: DiscordAccount | TelegramUser | TelegramGroup
+) {
+    if ("name" in account) {
+        // Discord
+        return parseCommunity(account);
+    } else if ("first_name" in account) {
+        // Telegram User
+        return {
+            platform: "Telegram",
+            nickname: account.first_name + " " + account.last_name,
+
+            handle: hashOf(account.id.toString(), 12),
+        } as Account;
+    } else {
+        // Telegram Group
+        return {
+            platform: "Telegram",
+            nickname: account.title,
+            handle: hashOf(account.id.toString(), 12),
+            dao: true,
+        } as Account;
+    }
 }

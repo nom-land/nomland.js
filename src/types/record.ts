@@ -14,3 +14,5 @@ export interface Record {
     last_modified?: Date;
     parsed: boolean;
 }
+
+export type Parser = "elephant" | "extractus";

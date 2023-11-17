@@ -17,6 +17,7 @@ import { addMember, addRecord, removeRecord } from "./utils";
 import { log } from "../utils/log";
 import { type EIP1193Provider } from "eip1193-types";
 import { getCommunityLists } from "./ls";
+import { Parser } from "../types";
 
 export async function curateRecordInCommunity(
     appName: string,
@@ -131,7 +132,8 @@ export async function processCuration(
     curation: Curation,
     url: string,
     adminPrivateKeyOrProvider: `0x${string}` | EIP1193Provider,
-    appName: string
+    appName: string,
+    parser?: Parser
 ) {
     const { curator, community, lists, reason, raw: rawData } = curation;
 
@@ -139,7 +141,7 @@ export async function processCuration(
     if (!rawData) log.warn("rawData is not defined");
     log.info("[DEBUG] Contract has been setup");
 
-    const record = await parseRecord(url);
+    const record = await parseRecord(url, parser);
     log.info("[DEBUG] url has been parsed");
 
     let mode: "server" | "client";
