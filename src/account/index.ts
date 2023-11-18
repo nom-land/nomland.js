@@ -28,8 +28,9 @@ export function makeAccount(
         // Telegram User
         return {
             platform: "Telegram",
-            nickname: account.first_name + " " + account.last_name,
-
+            nickname: account.last_name
+                ? account.first_name + " " + account.last_name
+                : account.first_name,
             handle: hashOf(account.id.toString(), 12),
         } as Account;
     } else {
