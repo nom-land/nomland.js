@@ -21,7 +21,7 @@ export default defineConfig((options) => [
     {
         ...commonConfig,
         entry: ["./src/index.ts"],
-        format: ["iife"],
+        format: ["esm"],
         outDir: "dist/browser",
         outExtension: () => {
             return {

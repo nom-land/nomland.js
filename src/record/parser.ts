@@ -122,7 +122,9 @@ async function extractData(
     switch (parser) {
         case "elephant":
             try {
-                const { extract: eleExtract } = await import("elephant-sdk");
+                const { extract: eleExtract } = await import(
+                    "@nomland/elephant"
+                );
                 const data = (await eleExtract(url)) as EleEntry;
                 const res = formatElephantData(data, baseEntity);
                 // TODO: temporary fix for elephant-sdk

@@ -258,7 +258,7 @@ export async function processDiscussion(
                 },
                 {
                     trait_type: "discussion community",
-                    value: communityId.toString(),
+                    value: communityId,
                 },
             ],
         },

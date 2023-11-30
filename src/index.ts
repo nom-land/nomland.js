@@ -11,6 +11,7 @@ import { Contract, Numberish } from "crossbell";
 import {
     getCharacter,
     getCommunityLists,
+    getFeeds,
     getList,
     getMembers,
     getNote,
@@ -40,6 +41,10 @@ export default class NomlandBase {
     /* Community id */
     ls(c: Accountish) {
         return getCommunityLists(this.appName, c);
+    }
+    /* Get all curations of a community */
+    getFeeds(cId: Numberish) {
+        return getFeeds(cId);
     }
     /* get curations by linklist id */
     lsById(id: Numberish) {

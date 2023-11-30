@@ -32,6 +32,116 @@ import { getAttr } from "./utils";
 import { client } from "../apis/graphql";
 import { gql } from "@urql/core";
 
+export async function getFeeds(id: Numberish) {
+    const fromCharacterId = id;
+    if (!fromCharacterId) throw new Error("No fromCharacterId");
+
+    const { data } = await client.query(
+        gql`
+                query getFeeds() 
+                {
+                  notes(
+                    where: {
+                      AND: [
+                        {
+                          metadata: {
+                            AND: [
+                              {
+                                content: {
+                                  path: ["attributes"]
+                                  array_contains: [
+                                    { trait_type: "entity type", value: "curation" }
+                                  ]
+                                }
+                              }
+                              {
+                                content: {
+                                  path: ["attributes"]
+                                  array_contains: [
+                                    { trait_type: "curation community", value: ${fromCharacterId.toString()} }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                    take: 10
+                    orderBy: {
+                      createdAt: desc
+                    }
+                  ) {
+                    characterId
+                    character{
+                      handle
+                      metadata {
+                        content
+                      }
+                    }
+                    noteId
+                    metadata {
+                      content
+                    }
+                    toCharacterId
+                    toCharacter {
+                      metadata{
+                        content
+                      }
+                      toLinks {
+                        linklistId
+                      }
+                    }
+                    _count {
+                      fromNotes
+                    }
+                    owner
+                    operator
+                    createdAt
+                  }
+                }
+                
+            `,
+        {}
+    );
+
+    const lastUpdated = data.notes[0].createdAt as string;
+
+    const curationNotes: {
+        n: CurationNote;
+        record: {
+            title: string;
+        };
+        stat: CurationStat;
+    }[] = data.notes.map(
+        (
+            n: NoteEntity & {
+                _count: {
+                    fromNotes: {
+                        n: Number;
+                    };
+                };
+            }
+        ) => {
+            const repliesCount = n._count.fromNotes;
+            return {
+                n: getCuration(n),
+                record: {
+                    title: (n.toCharacter?.metadata?.content as any)?.title,
+                },
+                stat: {
+                    replies: repliesCount,
+                },
+            };
+        }
+    );
+    return {
+        communityId: fromCharacterId,
+        curationNotes,
+        lastUpdated,
+    };
+}
+
 export async function getCommunityLists(appName: string, acc: Accountish) {
     const communityId = await getIdBy(acc);
     if (communityId === 0) return { count: 0, list: [] };
