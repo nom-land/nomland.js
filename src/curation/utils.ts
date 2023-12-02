@@ -60,3 +60,11 @@ export async function removeRecord(
 export function getAttr(attrs: AttributesMetadata["attributes"], key: string) {
     return attrs?.find((a) => a.trait_type === key)?.value;
 }
+
+export function getNoteId(postId: string) {
+    const ids = postId.split("-");
+    return {
+        characterId: ids[0],
+        noteId: ids[1],
+    };
+}

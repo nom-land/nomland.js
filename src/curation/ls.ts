@@ -28,15 +28,23 @@ import {
     CurationStat,
     ListData,
 } from "../types/curation";
-import { getAttr } from "./utils";
+import { getAttr, getNoteId } from "./utils";
 import { client } from "../apis/graphql";
 import { gql } from "@urql/core";
 
 export async function getFeeds(
     id: Numberish,
-    skip: number = 0,
-    take: number = 10
+    options?: {
+        skip: number;
+        take: number;
+        cursor: string;
+    }
 ) {
+    const skip = options?.skip || 0;
+    const take = options?.take || 10;
+    let cursor = options?.cursor || "";
+    const { characterId, noteId } = getNoteId(cursor);
+
     const fromCharacterId = id;
     if (!fromCharacterId) throw new Error("No fromCharacterId");
 
@@ -73,6 +81,16 @@ export async function getFeeds(
                     }
                     skip: ${skip.toString()}
                     take: ${take.toString()}
+                    ${
+                        cursor
+                            ? `cursor: {
+                        note_characterId_noteId_unique: {
+                          characterId: ${characterId.toString()},
+                          noteId: ${noteId.toString()}
+                        }
+                    }`
+                            : ""
+                    }
                     orderBy: {
                       createdAt: desc
                     }
