@@ -43,8 +43,8 @@ export default class NomlandBase {
         return getCommunityLists(this.appName, c);
     }
     /* Get all curations of a community */
-    getFeeds(cId: Numberish) {
-        return getFeeds(cId);
+    getFeeds(cId: Numberish, skip?: number, take?: number) {
+        return getFeeds(cId, skip, take);
     }
     /* get curations by linklist id */
     lsById(id: Numberish) {
