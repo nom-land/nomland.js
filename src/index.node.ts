@@ -1,7 +1,12 @@
-import { createCurationList, processCuration } from "./curation";
+import {
+    createCurationList,
+    processCuration,
+    processDiscussion,
+} from "./curation";
 import NomlandBase from "./index";
 import { type EIP1193Provider } from "eip1193-types";
 import { Accountish, Curation, Parser } from "./types";
+import { NoteMetadata } from "crossbell";
 
 export default class NomlandNode extends NomlandBase {
     #appKeyOrProvider: `0x${string}` | EIP1193Provider;
@@ -22,7 +27,21 @@ export default class NomlandNode extends NomlandBase {
             parser
         );
     }
-    processDiscussion() {}
+    processDiscussion(
+        poster: Accountish,
+        community: Accountish,
+        msg: NoteMetadata,
+        replyToPostId: string
+    ) {
+        return processDiscussion(
+            poster,
+            community,
+            msg,
+            replyToPostId,
+            this.#appKeyOrProvider,
+            this.appName
+        );
+    }
     add(c: Accountish, l: string) {
         return createCurationList(this.appName, this.#appKeyOrProvider, c, l);
     }

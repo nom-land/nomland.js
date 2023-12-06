@@ -3,7 +3,7 @@ Based on Crossbell, process the curation.
 */
 
 import { parseRecord } from "../record/parser";
-import { Contract, NoteMetadata } from "crossbell";
+import { Contract, NoteMetadata, Numberish, PostNoteOptions } from "crossbell";
 import {
     Curation,
     CurationReason,
@@ -12,7 +12,7 @@ import {
 } from "../types/curation";
 import { getCharacter, getCharacterByAcc, setup } from "../crossbell";
 import { getRecord } from "../record";
-import { Account, Accountish } from "../types/account";
+import { Accountish } from "../types/account";
 import { addMember, addRecord, removeRecord } from "./utils";
 import { log } from "../utils/log";
 import { type EIP1193Provider } from "eip1193-types";
@@ -219,75 +219,74 @@ export async function processCuration(
 }
 
 export async function processDiscussion(
-    poster: Account,
-    community: Account,
+    poster: Accountish,
+    community: Accountish,
     msgMetadata: NoteMetadata,
-    discussing: "note" | "record",
-    noteIdOrRecordId: string,
-    adminPrivateKey: `0x${string}`,
+    replyToPostId: string,
+    adminPrivateKey: EIP1193Provider | `0x${string}`,
     appName: string
 ) {
-    const { contract, admin } = await setup(adminPrivateKey);
+    let communityId: Numberish, posterId: Numberish;
+    const { contract, admin } = setup(adminPrivateKey);
 
-    const communityChar = await getCharacterByAcc({
-        c: contract,
-        acc: community,
-    });
-    const communityId = communityChar.characterId;
+    if (typeof community === "object") {
+        const communityChar = await getCharacterByAcc({
+            c: contract,
+            acc: community,
+        });
+        communityId = communityChar.characterId;
+    } else {
+        communityId = community;
+    }
 
-    const posterId = await getCharacter(contract, admin, poster, [
-        "POST_NOTE_FOR_NOTE",
-        "POST_NOTE_FOR_CHARACTER",
-        "POST_NOTE",
-        "LINK_NOTE",
-        "LINK_CHARACTER",
-    ]);
-    const noteOptions = {
-        characterId: posterId,
-        metadataOrUri: {
-            ...msgMetadata,
-            attributes: [
-                {
-                    trait_type: "entity type",
-                    value: "discussion",
-                },
-                {
-                    trait_type: "discussion community",
-                    value: communityId,
-                },
-            ],
-        },
-    };
+    if (typeof poster === "object") {
+        posterId = await getCharacter(contract, admin, poster, [
+            "POST_NOTE_FOR_NOTE",
+            "POST_NOTE_FOR_CHARACTER",
+            "POST_NOTE",
+            "LINK_NOTE",
+            "LINK_CHARACTER",
+        ]);
+    } else {
+        posterId = poster;
+    }
+
+    const noteMetadata = {
+        ...msgMetadata,
+        attributes: [
+            {
+                trait_type: "entity type",
+                value: "discussion",
+            },
+            {
+                trait_type: "discussion community",
+                value: Number(communityId),
+            },
+        ],
+    } as NoteMetadata;
 
     let sources = [appName];
     if (msgMetadata.sources) sources = sources.concat(msgMetadata.sources);
 
-    noteOptions.metadataOrUri.sources = sources;
+    noteMetadata.sources = sources;
+
+    const noteOptions = {
+        characterId: posterId,
+        metadataOrUri: noteMetadata,
+    } as PostNoteOptions;
 
     let noteId: bigint;
-    if (discussing === "note") {
-        const noteIds = noteIdOrRecordId.split("-"); // characterId-noteId
-        const cId = Number(noteIds[0]);
-        const nId = Number(noteIds[1]);
-        const refNote = {
-            cId,
-            nId,
-        };
-        noteId = (
-            await contract.note.postForNote({
-                targetCharacterId: refNote.cId,
-                targetNoteId: refNote.nId,
-                ...noteOptions,
-            })
-        ).data.noteId;
-    } else {
-        // but it's not useful... at least for now
-        noteId = (
-            await contract.note.postForCharacter({
-                toCharacterId: noteIdOrRecordId,
-                ...noteOptions,
-            })
-        ).data.noteId;
-    }
+    const replyToNoteIds = replyToPostId.split("-"); // characterId-noteId
+    const cId = replyToNoteIds[0];
+    const nId = replyToNoteIds[1];
+
+    noteId = (
+        await contract.note.postForNote({
+            targetCharacterId: cId,
+            targetNoteId: nId,
+            ...noteOptions,
+        })
+    ).data.noteId;
+
     return { characterId: posterId, noteId } as NoteId;
 }
