@@ -24,7 +24,6 @@ export async function curateRecordInCommunity(
     c: Contract,
     curator: number,
     communityId: number,
-    lists: string[],
     recordId: number,
     reason: CurationReason,
     rawData?: RawCuration
@@ -37,6 +36,7 @@ export async function curateRecordInCommunity(
 
     const metadata = {
         content: reason.comment,
+        attachments: reason.attachments,
         sources,
         date_published: rawData?.date_published || new Date().toISOString(), //TODO
         attributes: [
@@ -51,10 +51,6 @@ export async function curateRecordInCommunity(
             {
                 trait_type: "curation community",
                 value: communityId,
-            },
-            {
-                trait_type: "curation lists",
-                value: JSON.stringify(lists),
             },
             {
                 trait_type: "curation record",
@@ -203,7 +199,6 @@ export async function processCuration(
         contract,
         Number(curatorId),
         Number(communityId),
-        lists,
         Number(recordId),
         reason,
         rawData

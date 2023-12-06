@@ -1,8 +1,9 @@
-import { NoteEntity } from "crossbell";
+import { NoteEntity, NoteMetadata } from "crossbell";
 import { Accountish } from "./account";
 
 export interface CurationReason {
     comment: string;
+    attachments?: NoteMetadata["attachments"];
     tagSuggestions: string[];
     titleSuggestion?: string;
 }
