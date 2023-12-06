@@ -451,6 +451,7 @@ export function getCuration(
                 new Date(nMetadata?.date_published).toISOString()) ||
             "",
         content: nMetadata?.content?.toString() || "",
+        attachments: nMetadata?.attachments || [],
         curatorAvatars: cMetadata?.avatars || [],
         curatorName: cMetadata?.name || "",
         curatorHandle: c?.handle || "",

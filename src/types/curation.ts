@@ -40,6 +40,7 @@ export interface CurationNote {
     dateString: string;
     title: string;
     content: string;
+    attachments: NoteMetadata["attachments"];
     curatorAvatars: string[];
     curatorName: string;
     curatorHandle: string;
