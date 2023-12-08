@@ -5,7 +5,8 @@ import {
     TelegramGroup,
     TelegramUser,
 } from "../types/account";
-import { hashOf } from "../utils";
+import { encode, hashOf } from "../utils";
+import { settings } from "../config";
 
 function parseCommunity(guild: Guild) {
     const { name, id } = guild;
@@ -42,4 +43,33 @@ export function makeAccount(
             dao: true,
         } as Account;
     }
+}
+
+export function formatHandle(acc: Account) {
+    const guildCode = encode(acc.guildId ?? acc.handle);
+    const userCode = encode(acc.handle);
+    let tmpHandle = userCode + "-" + guildCode;
+
+    const suffix = hashOf(tmpHandle);
+
+    tmpHandle = tmpHandle.slice(0, 31 - 5) + "-" + suffix;
+
+    let handle = "";
+    for (let i = 0; i < Math.min(31, tmpHandle.length); i++) {
+        const c = tmpHandle[i];
+        if (
+            (c >= "a" && c <= "z") ||
+            (c >= "0" && c <= "9") ||
+            c == "_" ||
+            c == "-"
+        ) {
+            handle += c;
+            continue;
+        } else {
+            handle += "-";
+        }
+    }
+
+    const prefix = settings.botConfig.prod ? "" : "test-";
+    return (prefix + handle).slice(0, 31);
 }

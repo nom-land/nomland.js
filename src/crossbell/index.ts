@@ -9,41 +9,13 @@ import {
 } from "crossbell";
 import { Account, Accountish } from "../types/account";
 import { Record } from "../types/record";
-import { encode, hashOf } from "../utils";
-import { settings } from "../config";
 import { privateKeyToAddress } from "viem/accounts";
 import { type EIP1193Provider } from "eip1193-types";
+import { formatHandle } from "../account";
 
 type CharacterPermissionKey = keyof typeof CharacterOperatorPermission;
 
 export type Attrs = Exclude<AttributesMetadata["attributes"], null | undefined>;
-
-const formatHandle = (acc: Account) => {
-    const guildCode = encode(acc.guildId ?? acc.handle);
-    const userCode = encode(acc.handle);
-    let tmpHandle = userCode + "-" + guildCode;
-
-    const suffix = hashOf(tmpHandle);
-
-    tmpHandle = tmpHandle.slice(0, 31 - 5) + "-" + suffix;
-
-    let handle = "";
-    for (let i = 0; i < Math.min(31, tmpHandle.length); i++) {
-        const c = tmpHandle[i];
-        if (
-            (c >= "a" && c <= "z") ||
-            (c >= "0" && c <= "9") ||
-            c == "_" ||
-            c == "-"
-        ) {
-            handle += c;
-            continue;
-        } else {
-            handle += "-";
-        }
-    }
-    return handle;
-};
 
 const createNewCharacter = async (
     c: Contract,
@@ -131,8 +103,7 @@ export const getCharacterByAcc = async (options: {
     admin?: `0x${string}`;
     createIfNotExist?: true; // if this is true, admin has to be provided
 }) => {
-    const prefix = settings.botConfig.prod ? "" : "test-";
-    const handle = (prefix + formatHandle(options.acc)).slice(0, 31);
+    const handle = formatHandle(options.acc);
 
     let existed = true;
     const { c, acc, admin, createIfNotExist } = options;
