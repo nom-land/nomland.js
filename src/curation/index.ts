@@ -125,41 +125,28 @@ export async function createCurationList(
 }
 
 export async function processCuration(
+    contract: Contract,
+    admin: `0x${string}`,
+    appName: string,
     curation: Curation,
     url: string,
-    adminPrivateKeyOrProvider: `0x${string}` | EIP1193Provider,
-    appName: string,
     parser?: Parser
 ) {
     const { curator, community, lists, reason, raw: rawData } = curation;
 
-    const { contract, admin } = setup(adminPrivateKeyOrProvider);
     if (!rawData) log.warn("rawData is not defined");
     log.info("[DEBUG] Contract has been setup");
 
     const record = await parseRecord(url, parser);
     log.info("[DEBUG] url has been parsed");
 
-    let mode: "server" | "client";
-    if (typeof adminPrivateKeyOrProvider === "string") {
-        mode = "server";
-    } else {
-        mode = "client";
-    }
-    const communityId = await getCharacter(
-        contract,
-        admin,
-        community,
-        mode === "server"
-            ? [
-                  "POST_NOTE_FOR_NOTE",
-                  "POST_NOTE_FOR_CHARACTER",
-                  "POST_NOTE",
-                  "LINK_NOTE",
-                  "LINK_CHARACTER",
-              ]
-            : []
-    );
+    const communityId = await getCharacter(contract, admin, community, [
+        "POST_NOTE_FOR_NOTE",
+        "POST_NOTE_FOR_CHARACTER",
+        "POST_NOTE",
+        "LINK_NOTE",
+        "LINK_CHARACTER",
+    ]);
     log.info(
         "[DEBUG] Community char has been created, communityId is",
         communityId.toString()
@@ -183,13 +170,11 @@ export async function processCuration(
         recordId.toString()
     );
 
-    if (mode === "server") {
-        // Node env: Only if the admin is a private key, we can link the community to the curator
-        // TODO
-        await addMember(appName, contract, communityId, curatorId);
+    // Node env: Only if the admin is a private key, we can link the community to the curator
+    // TODO
+    await addMember(appName, contract, communityId, curatorId);
 
-        log.info("[DEBUG] Community char has followed curator char");
-    }
+    log.info("[DEBUG] Community char has followed curator char");
     // TODO: admin follows communityId
     // contract.linkCharacter(admin, communityId, "follow")
 
@@ -203,10 +188,8 @@ export async function processCuration(
         reason,
         rawData
     );
-    if (mode === "server") {
-        for (const list of lists) {
-            await addRecord(appName, contract, communityId, recordId, list);
-        }
+    for (const list of lists) {
+        await addRecord(appName, contract, communityId, recordId, list);
     }
     log.info("[DEBUG] Curation has been finished");
     return {
@@ -219,15 +202,15 @@ export async function processCuration(
 }
 
 export async function processDiscussion(
+    contract: Contract,
+    admin: `0x${string}`,
+    appName: string,
     poster: Accountish,
     community: Accountish,
     msgMetadata: NoteMetadata,
-    replyToPostId: string,
-    adminPrivateKey: EIP1193Provider | `0x${string}`,
-    appName: string
+    replyToPostId: string
 ) {
     let communityId: Numberish, posterId: Numberish;
-    const { contract, admin } = setup(adminPrivateKey);
 
     if (typeof community === "object") {
         const communityChar = await getCharacterByAcc({

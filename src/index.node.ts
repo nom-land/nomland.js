@@ -1,32 +1,39 @@
-import {
-    createCurationList,
-    processCuration,
-    processDiscussion,
-} from "./curation";
+import { processCuration, processDiscussion } from "./curation";
 import NomlandBase from "./index";
 import { type EIP1193Provider } from "eip1193-types";
 import { Accountish, Curation, Parser } from "./types";
-import { NoteMetadata } from "crossbell";
+import { Contract, NoteMetadata } from "crossbell";
+import { setup } from "./crossbell";
 
 export default class NomlandNode extends NomlandBase {
-    #appKeyOrProvider: `0x${string}` | EIP1193Provider;
+    public contract: Contract;
 
-    constructor(appName: string, appKeyOrProvider?: `0x${string}`) {
+    admin: `0x${string}`;
+
+    constructor(
+        appName: string,
+        appKeyOrProvider?: `0x${string}` | EIP1193Provider
+    ) {
         super(appName);
         const key =
             appKeyOrProvider ||
             `0x0000000000000000000000000000000000000000000000000000000000000000`;
-        this.#appKeyOrProvider = key;
+        const { contract, admin } = setup(key);
+
+        this.contract = contract;
+        this.admin = admin;
     }
     processCuration(c: Curation, url: string, parser?: Parser) {
         return processCuration(
+            this.contract,
+            this.admin,
+            this.appName,
             c,
             url,
-            this.#appKeyOrProvider,
-            this.appName,
             parser
         );
     }
+
     processDiscussion(
         poster: Accountish,
         community: Accountish,
@@ -34,16 +41,14 @@ export default class NomlandNode extends NomlandBase {
         replyToPostId: string
     ) {
         return processDiscussion(
+            this.contract,
+            this.admin,
+            this.appName,
             poster,
             community,
             msg,
-            replyToPostId,
-            this.#appKeyOrProvider,
-            this.appName
+            replyToPostId
         );
-    }
-    add(c: Accountish, l: string) {
-        return createCurationList(this.appName, this.#appKeyOrProvider, c, l);
     }
 }
 
