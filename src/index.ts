@@ -3,16 +3,13 @@
 // // 在 curation 过程中，用自己定义的解析器，可以将其解析为不同的品类
 // nomland.processCuration(curation, options: {parser: xxx})
 
-import { Accountish } from "./types/account";
 import { crossbell } from "crossbell/network";
 import * as nw from "crossbell/network";
 import { Contract, Numberish } from "crossbell";
 
 import {
     getCharacter,
-    getCommunityLists,
     getFeeds,
-    getList,
     getMembers,
     getNote,
     getRecordStats,
@@ -38,10 +35,6 @@ export default class NomlandBase {
         this.appName = appName;
     }
 
-    /* Community id */
-    ls(c: Accountish) {
-        return getCommunityLists(this.appName, c);
-    }
     /* Get all curations of a community */
     getFeeds(
         cId: Numberish,
@@ -53,14 +46,7 @@ export default class NomlandBase {
     ) {
         return getFeeds(cId, options);
     }
-    /* get curations by linklist id */
-    lsById(id: Numberish) {
-        return getList(this.appName, id);
-    }
-    /* Linklist id */
-    getMetadataById(id: Numberish) {
-        return getList(this.appName, id, true);
-    }
+
     /* Get curation note data */
     getCuration(characterId: Numberish, noteId: Numberish) {
         return getNote(characterId, noteId, "curation");
@@ -73,29 +59,6 @@ export default class NomlandBase {
     getDiscussionsCount(characterId: Numberish, noteId: Numberish) {
         return getRepliesCount(characterId, noteId);
     }
-    /* Get tags and list */
-    async getTagsAndLists(tagsOrList: string[], c: Accountish) {
-        tagsOrList = tagsOrList.map((t) =>
-            t.startsWith("#") ? t.slice(1) : t
-        );
-        const listNames = (await getCommunityLists(this.appName, c)).list.map(
-            (l) => l.listName
-        );
-
-        const tagSuggestions = [] as string[];
-        const listSuggestions = [] as string[];
-
-        tagsOrList?.forEach((tagOrList) => {
-            if (listNames.includes(tagOrList)) {
-                listSuggestions.push(tagOrList);
-            } else {
-                tagSuggestions.push(tagOrList);
-            }
-        });
-
-        return { tagSuggestions, listSuggestions };
-    }
-
     balanceOf(owner: `0x${string}`) {
         return new Contract(undefined).csb.getBalance({ owner });
     }

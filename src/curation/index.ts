@@ -10,13 +10,11 @@ import {
     NoteId,
     RawCuration,
 } from "../types/curation";
-import { getCharacter, getCharacterByAcc, setup } from "../crossbell";
+import { getCharacter, getCharacterByAcc } from "../crossbell";
 import { getRecord } from "../record";
 import { Accountish } from "../types/account";
-import { addMember, addRecord, removeRecord } from "./utils";
+import { addMember } from "./utils";
 import { log } from "../utils/log";
-import { type EIP1193Provider } from "eip1193-types";
-import { getCommunityLists } from "./ls";
 import { Parser } from "../types";
 
 export async function curateRecordInCommunity(
@@ -75,50 +73,6 @@ export async function curateRecordInCommunity(
     });
 
     return data.noteId;
-}
-
-// Make a new linklist for the community
-export async function createCurationList(
-    appName: string,
-    adminPrivateKey: `0x${string}` | EIP1193Provider,
-    community: Accountish,
-    list: string
-) {
-    const { contract, admin } = await setup(adminPrivateKey);
-
-    const res = await getCommunityLists(appName, community);
-    const listNames = res.list.map((l) => l.listName);
-    if (listNames.includes(list)) {
-        return;
-    }
-
-    const communityId = await getCharacter(contract, admin, community, [
-        "POST_NOTE_FOR_NOTE",
-        "POST_NOTE_FOR_CHARACTER",
-        "POST_NOTE",
-        "LINK_NOTE",
-        "LINK_CHARACTER",
-    ]);
-
-    //community links itself and then unlinks
-    console.log("linking...", list);
-    const tx = await addRecord(
-        appName,
-        contract,
-        communityId,
-        communityId,
-        list
-    );
-    console.log(tx.transactionHash);
-    console.log("unlinking...", list);
-    const tx2 = await removeRecord(
-        appName,
-        contract,
-        communityId,
-        communityId,
-        list
-    );
-    console.log(tx2.transactionHash);
 }
 
 export async function processCuration(
