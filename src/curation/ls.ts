@@ -457,11 +457,10 @@ export function getCuration(
         curatorHandle: c?.handle || "",
         title: nMetadata?.title || "",
         suggestedTags: JSON.parse(
-            (getAttr(attrs, "suggested tags") as string) || "[]"
-        ) as string[],
-        listNames: JSON.parse(
-            (getAttr(attrs, "curation lists") as string) || "[]"
-        ) as string[],
+            (getAttr(attrs, "suggested tags") as string) ||
+                JSON.stringify(nMetadata?.tags) ||
+                "[]"
+        ) as string[], // TODO: remove suggested tags
         raw: n,
         recordId: getAttr(attrs, "curation record") as string,
         communityId: getAttr(attrs, "curation community") as string,

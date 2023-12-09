@@ -1,10 +1,11 @@
 {
   "name": "nomland.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "nomland.js is a library to interact with the nomland protocol.",
   "main": "./dist/node/index.node.js",
   "types": "./dist/node/index.node.d.ts",
   "module": "./dist/node/index.node.mjs",
+  "browser": "dist/browser/index.browser.js",
   "files": [
     "dist",
     "README.md",
@@ -21,11 +22,12 @@
     "./browser": {
       "require": "./dist/browser/index.browser.js",
       "import": "./dist/browser/index.browser.js",
-      "types": "./dist/browser/index.browser.d.ts"
+      "types": "./dist/browser/index.d.mts"
     },
     ".": "./dist/node/index.node.js"
   },
   "scripts": {
+    "dev": "nodemon src/run.ts",
     "build": "tsup --dts",
     "lint": "tsc --noEmit",
     "prepublish": "npm run build",
@@ -39,7 +41,10 @@
     "@changesets/cli": "^2.26.2",
     "@types/bunyan": "^1.8.8",
     "@types/md5": "^2.3.2",
+    "@types/node": "20.5.4",
     "@types/punycode": "^2.1.1",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   },

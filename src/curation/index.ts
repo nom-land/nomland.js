@@ -38,7 +38,8 @@ export async function curateRecordInCommunity(
         content: reason.comment,
         attachments: reason.attachments,
         sources,
-        date_published: rawData?.date_published || new Date().toISOString(), //TODO
+        date_published: rawData?.date_published || new Date().toISOString(),
+        tags: reason.tagSuggestions,
         attributes: [
             {
                 trait_type: "entity type",
@@ -55,10 +56,6 @@ export async function curateRecordInCommunity(
             {
                 trait_type: "curation record",
                 value: recordId,
-            },
-            {
-                trait_type: "suggested tags",
-                value: JSON.stringify(reason.tagSuggestions),
             },
         ],
     } as NoteMetadata;

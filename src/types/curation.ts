@@ -45,7 +45,6 @@ export interface CurationNote {
     curatorName: string;
     curatorHandle: string;
     suggestedTags: string[];
-    listNames: string[];
     recordId: string;
     communityId: string;
     replies?: number;

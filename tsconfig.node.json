@@ -2,11 +2,10 @@
   "compilerOptions": {
     "composite": true,
     "target": "esnext",
-    "module": "esnext",
+    "module": "CommonJS",
     "lib": ["es2022", "DOM"],
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "skipLibCheck": true,
     "noUnusedLocals": true,
     "noImplicitAny": true,
