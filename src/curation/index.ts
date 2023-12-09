@@ -129,7 +129,7 @@ export async function processCuration(
     url: string,
     parser?: Parser
 ) {
-    const { curator, community, lists, reason, raw: rawData } = curation;
+    const { curator, community, reason, raw: rawData } = curation;
 
     if (!rawData) log.warn("rawData is not defined");
     log.info("[DEBUG] Contract has been setup");
@@ -185,9 +185,7 @@ export async function processCuration(
         reason,
         rawData
     );
-    for (const list of lists) {
-        await addRecord(appName, contract, communityId, recordId, list);
-    }
+
     log.info("[DEBUG] Curation has been finished");
     return {
         cid: communityId.toString(),

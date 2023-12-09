@@ -1,6 +1,6 @@
 {
   "name": "nomland.js",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "nomland.js is a library to interact with the nomland protocol.",
   "main": "./dist/node/index.node.js",
   "types": "./dist/node/index.node.d.ts",

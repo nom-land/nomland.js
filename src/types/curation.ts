@@ -18,7 +18,6 @@ export interface RawCuration {
 export interface Curation {
     curator: Accountish;
     community: Accountish;
-    lists: string[];
     reason: CurationReason;
     raw?: RawCuration; // raw is only recorded, not be parsed
     raws?: RawCuration[]; // raw is only recorded, not be parsed
