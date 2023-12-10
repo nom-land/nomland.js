@@ -66,6 +66,8 @@ export async function curateRecordInCommunity(
         metadata.title = reason.titleSuggestion;
     }
 
+    log.info("[DEBUG] metadata is", metadata);
+
     const { data } = await c.note.postForCharacter({
         characterId: curator,
         toCharacterId: recordId,
