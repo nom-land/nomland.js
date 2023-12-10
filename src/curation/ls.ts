@@ -22,11 +22,13 @@ import { client } from "../apis/graphql";
 import { gql } from "@urql/core";
 
 export async function getFeeds(
-    id: Numberish,
+    id?: Numberish,
+    tag?: string,
     options?: {
-        skip: number;
-        take: number;
-        cursor: string;
+        skip?: number;
+        take?: number;
+        cursor?: string;
+        tag?: string;
     }
 ) {
     const skip = options?.skip || 0;
@@ -35,7 +37,36 @@ export async function getFeeds(
     const { characterId, noteId } = getNoteId(cursor);
 
     const fromCharacterId = id;
-    if (!fromCharacterId) throw new Error("No fromCharacterId");
+
+    const fromCharacterQuery = fromCharacterId
+        ? `{
+        content: {
+          path: ["attributes"]
+          array_contains: [
+            { trait_type: "curation community", value: ${fromCharacterId.toString()} }
+          ]
+        }
+      }`
+        : "";
+
+    const tagQuery = tag
+        ? `{
+          content: {
+            path: ["tags"]
+            array_contains: ["${tag}"]
+          }
+      }`
+        : "";
+
+    const cursorQuery =
+        cursor !== ""
+            ? `cursor: {
+            note_characterId_noteId_unique: {
+              characterId: ${characterId.toString()},
+              noteId: ${noteId.toString()}
+            }
+        }`
+            : "";
 
     const { data } = await client.query(
         gql`
@@ -55,14 +86,8 @@ export async function getFeeds(
                                   ]
                                 }
                               }
-                              {
-                                content: {
-                                  path: ["attributes"]
-                                  array_contains: [
-                                    { trait_type: "curation community", value: ${fromCharacterId.toString()} }
-                                  ]
-                                }
-                              }
+                              ${fromCharacterQuery}
+                              ${tagQuery}
                             ]
                           }
                         }
@@ -70,16 +95,7 @@ export async function getFeeds(
                     }
                     skip: ${skip.toString()}
                     take: ${take.toString()}
-                    ${
-                        cursor
-                            ? `cursor: {
-                        note_characterId_noteId_unique: {
-                          characterId: ${characterId.toString()},
-                          noteId: ${noteId.toString()}
-                        }
-                    }`
-                            : ""
-                    }
+                    ${cursorQuery}
                     orderBy: {
                       createdAt: desc
                     }
@@ -117,7 +133,7 @@ export async function getFeeds(
         {}
     );
 
-    const lastUpdated = data.notes[0].createdAt as string;
+    const lastUpdated = data?.notes[0]?.createdAt as string;
 
     const curationNotes: {
         n: CurationNote;

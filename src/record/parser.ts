@@ -116,7 +116,6 @@ async function extractData(
     const baseEntity = {
         url,
         version: "20231115",
-        parser,
     } as BaseEntity;
 
     switch (parser) {
@@ -143,6 +142,7 @@ async function extractData(
                         },
                     ];
                 if (exData.links) res.links = exData.links;
+                res.parser = "elephant";
                 return res;
             } catch (e) {
                 log.error(e);
@@ -154,7 +154,9 @@ async function extractData(
                     "@extractus/article-extractor"
                 );
                 const data = (await extract(url)) as ExtractusArticleData;
-                return formatExtractusData(data, baseEntity);
+                const res = formatExtractusData(data, baseEntity);
+                res.parser = "extractus";
+                return res;
             } catch (e) {
                 log.error(e);
             }
