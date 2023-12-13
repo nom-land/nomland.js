@@ -1,13 +1,12 @@
-import NomlandNode from "./index.node";
+import { parseRecord } from "./index.node";
 import "dotenv/config";
 
 async function test() {
-    const nom = new NomlandNode(
-        "test-app",
-        process.env.APP_ADMIN as `0x${string}`
+    const result = await parseRecord(
+        "https://www.xiaoyuzhoufm.com/episode/6572ee8eb81e5be7d2f566ba",
+        "elephant"
     );
-    const data = await nom.getFeeds(57762, "关于社交的一切");
-    console.log(data.curationNotes.map((n) => n.n.content));
+    console.log(result);
 }
 
 async function main() {

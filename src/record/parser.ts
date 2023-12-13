@@ -71,16 +71,9 @@ export interface ExtractusArticleData {
     ttr?: number;
 }
 
-function formatElephantData(data: EleEntry, baseEntity: BaseEntity): Entity {
+function formatElephantData(data: Entity, baseEntity: BaseEntity): Entity {
     return {
-        title: data.metaData?.title || "",
-        description: "",
-        covers: [],
-        type: data.type,
-        metaData: {
-            platform: data.platform,
-            ...data.metaData,
-        },
+        ...data,
         ...baseEntity,
     };
 }
@@ -115,7 +108,7 @@ async function extractData(
 ): Promise<Entity> {
     const baseEntity = {
         url,
-        version: "20231115",
+        version: "20231121",
     } as BaseEntity;
 
     switch (parser) {
@@ -124,26 +117,29 @@ async function extractData(
                 const { extract: eleExtract } = await import(
                     "@nomland/elephant"
                 );
-                const data = (await eleExtract(url)) as EleEntry;
-                const res = formatElephantData(data, baseEntity);
-                // TODO: temporary fix for elephant-sdk
-                const { extract: exExtract } = await import(
-                    "@extractus/article-extractor"
-                );
-                const exData = (await exExtract(
-                    url
-                )) as ExtractusArticleData | null;
-                if (!exData) return res;
-                if (exData.description) res.description = exData.description;
-                if (exData.image)
-                    res.covers = [
-                        {
-                            address: exData.image,
-                        },
-                    ];
-                if (exData.links) res.links = exData.links;
-                res.parser = "elephant";
-                return res;
+                const data = (await eleExtract(url)) as Entity;
+                if (data) {
+                    const res = formatElephantData(data, baseEntity);
+                    // TODO: temporary fix for elephant-sdk
+                    // const { extract: exExtract } = await import(
+                    //     "@extractus/article-extractor"
+                    // );
+                    // const exData = (await exExtract(
+                    //     url
+                    // )) as ExtractusArticleData | null;
+                    // if (!exData) return res;
+                    // if (exData.description)
+                    //     res.description = exData.description;
+                    // if (exData.image)
+                    //     res.covers = [
+                    //         {
+                    //             address: exData.image,
+                    //         },
+                    //     ];
+                    // if (exData.links) res.links = exData.links;
+                    res.parser = "elephant";
+                    return res;
+                }
             } catch (e) {
                 log.error(e);
                 // If there's error, don't break and just try the next one.

@@ -6,7 +6,7 @@ export interface BaseEntity {
     /**
      * The version of this entity.
      */
-    version: "20231115";
+    version: "20231121";
 
     parser: "elephant" | "extractus" | "custom";
 }
@@ -45,7 +45,15 @@ export interface Entity extends BaseEntity {
      *  - `movie` : a movie
      *  - `game` : a game
      */
-    type?: "post" | "book" | "video" | "podcast" | "paper" | "song" | "movie" | "game";
+    type?:
+        | "post"
+        | "book"
+        | "video"
+        | "podcast"
+        | "paper"
+        | "song"
+        | "movie"
+        | "game";
     /**
      * The metadata of this entity.
      */
@@ -101,7 +109,8 @@ interface DigitalContent<Derivation extends "translation" | "original"> {
     originalLanguage?: Derivation extends "translation" ? string : never;
 }
 
-export interface BookMetaData extends DigitalContent<"translation" | "original"> {
+export interface BookMetaData
+    extends DigitalContent<"translation" | "original"> {
     /**
      * Pages of this book.
      */
@@ -112,7 +121,8 @@ export interface BookMetaData extends DigitalContent<"translation" | "original">
     ISBN?: string;
 }
 
-export interface PostMetaData extends DigitalContent<"translation" | "original"> {
+export interface PostMetaData
+    extends DigitalContent<"translation" | "original"> {
     /*
      * The type of the post.
      */
