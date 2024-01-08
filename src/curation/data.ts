@@ -336,13 +336,52 @@ export async function getMembers(
     }
 }
 
-export async function getCharacter(id: Numberish) {
-    const c = createContract();
+export async function getCharacter(appName: string, id: Numberish) {
+    const { data } = await client.query(
+        gql`query getCharacter()
+            {
+                characters(where: { characterId: { equals: ${id.toString()} } }) {
+                    handle
+                    characterId
+                    metadata {
+                        content
+                    }
+                    owner
+                    fromLinks {
+                        linkType
+                        toCharacterId
+                    }
+                    toLinks {
+                        linkType
+                        fromCharacter {
+                            characterId
+                            metadata {
+                                content
+                            }
+                        }
+                    }
+                }
+            }
+        `,
+        {}
+    );
 
-    const { data } = await c.character.get({
-        characterId: id,
-    });
-    return data;
+    // TODO: followers and followings
+    const character = data.characters[0];
+    const communities = (character.toLinks = character.toLinks
+        .map((l: any) => {
+            if (l.linkType !== getMembersLinkType(appName)) return null;
+            return {
+                id: l.fromCharacter.characterId,
+                community: l.fromCharacter.metadata as CharacterMetadata,
+            };
+        })
+        .filter((l: any) => l !== null));
+
+    return {
+        curator: character.metadata.content as CharacterMetadata,
+        communities,
+    };
 }
 
 export async function getRecordStats(recordId: Numberish) {

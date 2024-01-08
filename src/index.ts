@@ -70,7 +70,7 @@ export default class NomlandBase {
         return getMembers(this.appName, communityId);
     }
     getCharacter(id: Numberish) {
-        return getCharacter(id);
+        return getCharacter(this.appName, id);
     }
     getRecordStats(recordId: Numberish) {
         return getRecordStats(recordId);
