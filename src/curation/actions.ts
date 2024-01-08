@@ -17,66 +17,6 @@ import { addMember } from "./utils";
 import { log } from "../utils/log";
 import { Parser } from "../types";
 
-export async function curateRecordInCommunity(
-    appName: string,
-    c: Contract,
-    curator: number,
-    communityId: number,
-    recordId: number,
-    reason: CurationReason,
-    rawData?: RawCuration
-) {
-    // 1. Curator 发一条 note，且这个note指向 Record
-    // 2. Community Character 把这个 note 放到 community list 里（link）
-
-    let sources = [appName];
-    if (rawData?.sources) sources = sources.concat(rawData.sources);
-
-    const metadata = {
-        content: reason.comment,
-        attachments: reason.attachments,
-        sources,
-        date_published: rawData?.date_published || new Date().toISOString(),
-        tags: reason.tagSuggestions,
-        attributes: [
-            {
-                trait_type: "entity type",
-                value: "curation",
-            },
-            {
-                trait_type: "curation content",
-                value: rawData?.content,
-            },
-            {
-                trait_type: "curation community",
-                value: communityId,
-            },
-            {
-                trait_type: "curation record",
-                value: recordId,
-            },
-        ],
-    } as NoteMetadata;
-
-    if (rawData?.external_url) {
-        metadata.external_urls = [rawData.external_url];
-    }
-
-    if (reason.titleSuggestion) {
-        metadata.title = reason.titleSuggestion;
-    }
-
-    log.info("[DEBUG] metadata is", metadata);
-
-    const { data } = await c.note.postForCharacter({
-        characterId: curator,
-        toCharacterId: recordId,
-        metadataOrUri: metadata,
-    });
-
-    return data.noteId;
-}
-
 export async function processCuration(
     contract: Contract,
     admin: `0x${string}`,
@@ -223,4 +163,64 @@ export async function processDiscussion(
     ).data.noteId;
 
     return { characterId: posterId, noteId } as NoteId;
+}
+
+async function curateRecordInCommunity(
+    appName: string,
+    c: Contract,
+    curator: number,
+    communityId: number,
+    recordId: number,
+    reason: CurationReason,
+    rawData?: RawCuration
+) {
+    // 1. Curator 发一条 note，且这个note指向 Record
+    // 2. Community Character 把这个 note 放到 community list 里（link）
+
+    let sources = [appName];
+    if (rawData?.sources) sources = sources.concat(rawData.sources);
+
+    const metadata = {
+        content: reason.comment,
+        attachments: reason.attachments,
+        sources,
+        date_published: rawData?.date_published || new Date().toISOString(),
+        tags: reason.tagSuggestions,
+        attributes: [
+            {
+                trait_type: "entity type",
+                value: "curation",
+            },
+            {
+                trait_type: "curation content",
+                value: rawData?.content,
+            },
+            {
+                trait_type: "curation community",
+                value: communityId,
+            },
+            {
+                trait_type: "curation record",
+                value: recordId,
+            },
+        ],
+    } as NoteMetadata;
+
+    if (rawData?.external_url) {
+        metadata.external_urls = [rawData.external_url];
+    }
+
+    if (reason.titleSuggestion) {
+        metadata.title = reason.titleSuggestion;
+    }
+
+    log.info("[DEBUG] metadata is", metadata);
+
+    const { data } = await c.note.postForCharacter({
+        characterId: curator,
+        toCharacterId: recordId,
+        metadataOrUri: metadata,
+    });
+
+    return data.noteId;
 }

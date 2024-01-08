@@ -1,4 +1,4 @@
-import { processCuration, processDiscussion } from "./curation";
+import { processCuration, processDiscussion } from "./curation/actions";
 import NomlandBase from "./index";
 import { type EIP1193Provider } from "eip1193-types";
 import { Accountish, Curation, Parser } from "./types";

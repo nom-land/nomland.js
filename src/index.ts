@@ -15,7 +15,7 @@ import {
     getRecordStats,
     getReplies,
     getRepliesCount,
-} from "./curation/ls";
+} from "./curation/data";
 import { settings } from "./config";
 //Localhost
 if (process.env.NODE_ENV === "local") {
