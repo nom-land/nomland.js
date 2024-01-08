@@ -22,23 +22,29 @@ import { client } from "../apis/graphql";
 import { gql } from "@urql/core";
 
 export async function getFeeds(
-    id?: Numberish,
-    tag?: string,
+    params?: {
+        community?: Numberish;
+        curator?: Numberish;
+        tag?: string;
+    },
+
     options?: {
         skip?: number;
         take?: number;
         cursor?: string;
-        tag?: string;
     }
 ) {
-    const skip = options?.skip || 0;
-    const take = options?.take || 10;
+    const { community, curator, tag } = params || {};
+
+    const skip = options?.skip?.toString() || "0";
+    const take = options?.take?.toString() || "10";
     let cursor = options?.cursor || "";
+
     const { characterId, noteId } = getNoteId(cursor);
 
-    const fromCharacterId = id;
+    const fromCharacterId = community;
 
-    const fromCharacterQuery = fromCharacterId
+    const communityQuery = fromCharacterId
         ? `{
         content: {
           path: ["attributes"]
@@ -47,6 +53,14 @@ export async function getFeeds(
           ]
         }
       }`
+        : "";
+
+    const curatorQuery = curator
+        ? `{
+            characterId: {
+              equals: ${curator.toString()}
+            }
+          }`
         : "";
 
     const tagQuery = tag
@@ -68,6 +82,70 @@ export async function getFeeds(
         }`
             : "";
 
+    const query = `
+    query getFeeds() 
+    {
+      notes(
+        where: {
+          ${curatorQuery}
+          AND: [
+            {
+              metadata: {
+                AND: [
+                  {
+                    content: {
+                      path: ["attributes"]
+                      array_contains: [
+                        { trait_type: "entity type", value: "curation" }
+                      ]
+                    }
+                  }
+                  ${communityQuery}
+                  ${tagQuery}
+                ]
+              }
+            }
+          ]
+        }
+        skip: ${skip}
+        take: ${take}
+        ${cursorQuery}
+        orderBy: {
+          createdAt: desc
+        }
+      ) {
+        characterId
+        character{
+          handle
+          metadata {
+            content
+          }
+        }
+        noteId
+        metadata {
+          content
+        }
+        toCharacterId
+        toCharacter {
+          metadata{
+            content
+          }
+          toLinks {
+            linklistId
+          }
+        }
+        _count {
+          fromNotes
+        }
+        owner
+        operator
+        createdAt
+      }
+    }
+    
+`;
+    console.log(query);
+
     const { data } = await client.query(
         gql`
                 query getFeeds() 
@@ -75,6 +153,7 @@ export async function getFeeds(
                   notes(
                     where: {
                       AND: [
+                        ${curatorQuery}
                         {
                           metadata: {
                             AND: [
@@ -86,15 +165,15 @@ export async function getFeeds(
                                   ]
                                 }
                               }
-                              ${fromCharacterQuery}
+                              ${communityQuery}
                               ${tagQuery}
                             ]
                           }
                         }
                       ]
                     }
-                    skip: ${skip.toString()}
-                    take: ${take.toString()}
+                    skip: ${skip}
+                    take: ${take}
                     ${cursorQuery}
                     orderBy: {
                       createdAt: desc
@@ -133,8 +212,6 @@ export async function getFeeds(
         {}
     );
 
-    const lastUpdated = data?.notes[0]?.createdAt as string;
-
     const curationNotes: {
         n: CurationNote;
         record: {
@@ -163,11 +240,8 @@ export async function getFeeds(
             };
         }
     );
-    return {
-        communityId: fromCharacterId,
-        curationNotes,
-        lastUpdated,
-    };
+    return;
+    curationNotes;
 }
 
 export async function getNote(

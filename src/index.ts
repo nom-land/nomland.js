@@ -37,15 +37,18 @@ export default class NomlandBase {
 
     /* Get all curations of a community */
     getFeeds(
-        cId?: Numberish,
-        tag?: string,
+        params?: {
+            community?: Numberish;
+            curator?: Numberish;
+            tag?: string;
+        },
         options?: {
             skip?: number;
             take?: number;
             cursor?: string;
         }
     ) {
-        return getFeeds(cId, tag, options);
+        return getFeeds(params, options);
     }
 
     /* Get curation note data */
