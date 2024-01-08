@@ -82,70 +82,6 @@ export async function getFeeds(
         }`
             : "";
 
-    const query = `
-    query getFeeds() 
-    {
-      notes(
-        where: {
-          ${curatorQuery}
-          AND: [
-            {
-              metadata: {
-                AND: [
-                  {
-                    content: {
-                      path: ["attributes"]
-                      array_contains: [
-                        { trait_type: "entity type", value: "curation" }
-                      ]
-                    }
-                  }
-                  ${communityQuery}
-                  ${tagQuery}
-                ]
-              }
-            }
-          ]
-        }
-        skip: ${skip}
-        take: ${take}
-        ${cursorQuery}
-        orderBy: {
-          createdAt: desc
-        }
-      ) {
-        characterId
-        character{
-          handle
-          metadata {
-            content
-          }
-        }
-        noteId
-        metadata {
-          content
-        }
-        toCharacterId
-        toCharacter {
-          metadata{
-            content
-          }
-          toLinks {
-            linklistId
-          }
-        }
-        _count {
-          fromNotes
-        }
-        owner
-        operator
-        createdAt
-      }
-    }
-    
-`;
-    console.log(query);
-
     const { data } = await client.query(
         gql`
                 query getFeeds() 
@@ -240,8 +176,7 @@ export async function getFeeds(
             };
         }
     );
-    return;
-    curationNotes;
+    return curationNotes;
 }
 
 export async function getNote(
