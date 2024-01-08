@@ -355,6 +355,7 @@ export async function getCharacter(appName: string, id: Numberish) {
                         linkType
                         fromCharacter {
                             characterId
+                            handle
                             metadata {
                                 content
                             }
@@ -373,13 +374,18 @@ export async function getCharacter(appName: string, id: Numberish) {
             if (l.linkType !== getMembersLinkType(appName)) return null;
             return {
                 id: l.fromCharacter.characterId,
+                handle: l.fromCharacter.handle,
                 community: l.fromCharacter.metadata as CharacterMetadata,
             };
         })
         .filter((l: any) => l !== null));
 
     return {
-        curator: character.metadata.content as CharacterMetadata,
+        curator: {
+            handle: character.handle,
+            characterId: character.characterId,
+            metadata: character.metadata.content as CharacterMetadata,
+        },
         communities,
     };
 }
